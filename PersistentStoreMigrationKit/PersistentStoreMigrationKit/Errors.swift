@@ -12,7 +12,7 @@ public extension NSError {
 	public static var persistentStoreMigrationKitDomain: String { return "com.bloo7.persistentstoremigrationkit" }
 	
 	public enum PersistentStoreMigrationKitCodes: Int {
-		case CouldNotFindSourceModel
+		case CouldNotFindSourceModel = 1
 		case CouldNotInferMappingSteps
 	}
 	

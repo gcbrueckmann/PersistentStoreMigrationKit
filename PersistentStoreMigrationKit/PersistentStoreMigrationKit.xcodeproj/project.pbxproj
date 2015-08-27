@@ -1,0 +1,456 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		ED27A2C51B8F45D9005FAFCB /* ModelV2ToModelV3.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = EDA89C511B8DF11400E9B761 /* ModelV2ToModelV3.xcmappingmodel */; };
+		ED27A2C61B8F46B9005FAFCB /* ModelV1ToModelV2.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = EDA89C4E1B8DF0B500E9B761 /* ModelV1ToModelV2.xcmappingmodel */; };
+		ED27A2C71B8F46BC005FAFCB /* TestModelV2.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = EDA89C571B8DF15B00E9B761 /* TestModelV2.xcdatamodel */; };
+		ED69308F1B8E306700F9493D /* MigrationPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED69308E1B8E306700F9493D /* MigrationPlan.swift */; };
+		ED6930911B8E45A100F9493D /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6930901B8E45A100F9493D /* Errors.swift */; };
+		ED6930931B8E4E0300F9493D /* MigrationStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6930921B8E4E0300F9493D /* MigrationStep.swift */; };
+		EDA89C2F1B8DEE7F00E9B761 /* PersistentStoreMigrationKit.h in Headers */ = {isa = PBXBuildFile; fileRef = EDA89C2E1B8DEE7F00E9B761 /* PersistentStoreMigrationKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EDA89C351B8DEE7F00E9B761 /* PersistentStoreMigrationKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDA89C291B8DEE7F00E9B761 /* PersistentStoreMigrationKit.framework */; };
+		EDA89C3C1B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA89C3B1B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests.swift */; };
+		EDA89C461B8DEEA800E9B761 /* MigrationOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA89C451B8DEEA800E9B761 /* MigrationOperation.swift */; };
+		EDA89C561B8DF15200E9B761 /* TestModelV1.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = EDA89C551B8DF15200E9B761 /* TestModelV1.xcdatamodel */; };
+		EDA89C5A1B8DF15B00E9B761 /* TestModelV3.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = EDA89C581B8DF15B00E9B761 /* TestModelV3.xcdatamodel */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		EDA89C361B8DEE7F00E9B761 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EDA89C201B8DEE7F00E9B761 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EDA89C281B8DEE7F00E9B761;
+			remoteInfo = PersistentStoreMigrationKit;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		ED69308E1B8E306700F9493D /* MigrationPlan.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MigrationPlan.swift; sourceTree = "<group>"; };
+		ED6930901B8E45A100F9493D /* Errors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
+		ED6930921B8E4E0300F9493D /* MigrationStep.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MigrationStep.swift; sourceTree = "<group>"; };
+		EDA89C291B8DEE7F00E9B761 /* PersistentStoreMigrationKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PersistentStoreMigrationKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EDA89C2D1B8DEE7F00E9B761 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EDA89C2E1B8DEE7F00E9B761 /* PersistentStoreMigrationKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PersistentStoreMigrationKit.h; sourceTree = "<group>"; };
+		EDA89C341B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PersistentStoreMigrationKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EDA89C3A1B8DEE7F00E9B761 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EDA89C3B1B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentStoreMigrationKitTests.swift; sourceTree = "<group>"; };
+		EDA89C451B8DEEA800E9B761 /* MigrationOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MigrationOperation.swift; sourceTree = "<group>"; };
+		EDA89C4E1B8DF0B500E9B761 /* ModelV1ToModelV2.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = ModelV1ToModelV2.xcmappingmodel; sourceTree = "<group>"; };
+		EDA89C511B8DF11400E9B761 /* ModelV2ToModelV3.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = ModelV2ToModelV3.xcmappingmodel; sourceTree = "<group>"; };
+		EDA89C551B8DF15200E9B761 /* TestModelV1.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = TestModelV1.xcdatamodel; sourceTree = "<group>"; };
+		EDA89C571B8DF15B00E9B761 /* TestModelV2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = TestModelV2.xcdatamodel; sourceTree = "<group>"; };
+		EDA89C581B8DF15B00E9B761 /* TestModelV3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = TestModelV3.xcdatamodel; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EDA89C251B8DEE7F00E9B761 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EDA89C311B8DEE7F00E9B761 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EDA89C351B8DEE7F00E9B761 /* PersistentStoreMigrationKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		EDA89C1F1B8DEE7F00E9B761 = {
+			isa = PBXGroup;
+			children = (
+				EDA89C2B1B8DEE7F00E9B761 /* PersistentStoreMigrationKit */,
+				EDA89C381B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests */,
+				EDA89C2A1B8DEE7F00E9B761 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		EDA89C2A1B8DEE7F00E9B761 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EDA89C291B8DEE7F00E9B761 /* PersistentStoreMigrationKit.framework */,
+				EDA89C341B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EDA89C2B1B8DEE7F00E9B761 /* PersistentStoreMigrationKit */ = {
+			isa = PBXGroup;
+			children = (
+				EDA89C2E1B8DEE7F00E9B761 /* PersistentStoreMigrationKit.h */,
+				ED6930901B8E45A100F9493D /* Errors.swift */,
+				EDA89C451B8DEEA800E9B761 /* MigrationOperation.swift */,
+				ED69308E1B8E306700F9493D /* MigrationPlan.swift */,
+				ED6930921B8E4E0300F9493D /* MigrationStep.swift */,
+				EDA89C2C1B8DEE7F00E9B761 /* Supporting Files */,
+			);
+			path = PersistentStoreMigrationKit;
+			sourceTree = "<group>";
+		};
+		EDA89C2C1B8DEE7F00E9B761 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				EDA89C2D1B8DEE7F00E9B761 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		EDA89C381B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests */ = {
+			isa = PBXGroup;
+			children = (
+				EDA89C3B1B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests.swift */,
+				EDA89C391B8DEE7F00E9B761 /* Supporting Files */,
+				EDA89C551B8DF15200E9B761 /* TestModelV1.xcdatamodel */,
+				EDA89C4E1B8DF0B500E9B761 /* ModelV1ToModelV2.xcmappingmodel */,
+				EDA89C571B8DF15B00E9B761 /* TestModelV2.xcdatamodel */,
+				EDA89C511B8DF11400E9B761 /* ModelV2ToModelV3.xcmappingmodel */,
+				EDA89C581B8DF15B00E9B761 /* TestModelV3.xcdatamodel */,
+			);
+			path = PersistentStoreMigrationKitTests;
+			sourceTree = "<group>";
+		};
+		EDA89C391B8DEE7F00E9B761 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				EDA89C3A1B8DEE7F00E9B761 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		EDA89C261B8DEE7F00E9B761 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EDA89C2F1B8DEE7F00E9B761 /* PersistentStoreMigrationKit.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		EDA89C281B8DEE7F00E9B761 /* PersistentStoreMigrationKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EDA89C3F1B8DEE7F00E9B761 /* Build configuration list for PBXNativeTarget "PersistentStoreMigrationKit" */;
+			buildPhases = (
+				EDA89C241B8DEE7F00E9B761 /* Sources */,
+				EDA89C251B8DEE7F00E9B761 /* Frameworks */,
+				EDA89C261B8DEE7F00E9B761 /* Headers */,
+				EDA89C271B8DEE7F00E9B761 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PersistentStoreMigrationKit;
+			productName = PersistentStoreMigrationKit;
+			productReference = EDA89C291B8DEE7F00E9B761 /* PersistentStoreMigrationKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		EDA89C331B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EDA89C421B8DEE7F00E9B761 /* Build configuration list for PBXNativeTarget "PersistentStoreMigrationKitTests" */;
+			buildPhases = (
+				EDA89C301B8DEE7F00E9B761 /* Sources */,
+				EDA89C311B8DEE7F00E9B761 /* Frameworks */,
+				EDA89C321B8DEE7F00E9B761 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EDA89C371B8DEE7F00E9B761 /* PBXTargetDependency */,
+			);
+			name = PersistentStoreMigrationKitTests;
+			productName = PersistentStoreMigrationKitTests;
+			productReference = EDA89C341B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EDA89C201B8DEE7F00E9B761 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0640;
+				ORGANIZATIONNAME = "Georg C. Brückmann";
+				TargetAttributes = {
+					EDA89C281B8DEE7F00E9B761 = {
+						CreatedOnToolsVersion = 6.4;
+					};
+					EDA89C331B8DEE7F00E9B761 = {
+						CreatedOnToolsVersion = 6.4;
+					};
+				};
+			};
+			buildConfigurationList = EDA89C231B8DEE7F00E9B761 /* Build configuration list for PBXProject "PersistentStoreMigrationKit" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = EDA89C1F1B8DEE7F00E9B761;
+			productRefGroup = EDA89C2A1B8DEE7F00E9B761 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				EDA89C281B8DEE7F00E9B761 /* PersistentStoreMigrationKit */,
+				EDA89C331B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EDA89C271B8DEE7F00E9B761 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EDA89C321B8DEE7F00E9B761 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		EDA89C241B8DEE7F00E9B761 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ED6930931B8E4E0300F9493D /* MigrationStep.swift in Sources */,
+				EDA89C461B8DEEA800E9B761 /* MigrationOperation.swift in Sources */,
+				ED6930911B8E45A100F9493D /* Errors.swift in Sources */,
+				ED69308F1B8E306700F9493D /* MigrationPlan.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EDA89C301B8DEE7F00E9B761 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ED27A2C71B8F46BC005FAFCB /* TestModelV2.xcdatamodel in Sources */,
+				ED27A2C51B8F45D9005FAFCB /* ModelV2ToModelV3.xcmappingmodel in Sources */,
+				ED27A2C61B8F46B9005FAFCB /* ModelV1ToModelV2.xcmappingmodel in Sources */,
+				EDA89C561B8DF15200E9B761 /* TestModelV1.xcdatamodel in Sources */,
+				EDA89C3C1B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests.swift in Sources */,
+				EDA89C5A1B8DF15B00E9B761 /* TestModelV3.xcdatamodel in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		EDA89C371B8DEE7F00E9B761 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EDA89C281B8DEE7F00E9B761 /* PersistentStoreMigrationKit */;
+			targetProxy = EDA89C361B8DEE7F00E9B761 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		EDA89C3D1B8DEE7F00E9B761 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		EDA89C3E1B8DEE7F00E9B761 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		EDA89C401B8DEE7F00E9B761 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = PersistentStoreMigrationKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		EDA89C411B8DEE7F00E9B761 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = PersistentStoreMigrationKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		EDA89C431B8DEE7F00E9B761 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = PersistentStoreMigrationKitTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		EDA89C441B8DEE7F00E9B761 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = PersistentStoreMigrationKitTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		EDA89C231B8DEE7F00E9B761 /* Build configuration list for PBXProject "PersistentStoreMigrationKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EDA89C3D1B8DEE7F00E9B761 /* Debug */,
+				EDA89C3E1B8DEE7F00E9B761 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EDA89C3F1B8DEE7F00E9B761 /* Build configuration list for PBXNativeTarget "PersistentStoreMigrationKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EDA89C401B8DEE7F00E9B761 /* Debug */,
+				EDA89C411B8DEE7F00E9B761 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EDA89C421B8DEE7F00E9B761 /* Build configuration list for PBXNativeTarget "PersistentStoreMigrationKitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EDA89C431B8DEE7F00E9B761 /* Debug */,
+				EDA89C441B8DEE7F00E9B761 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = EDA89C201B8DEE7F00E9B761 /* Project object */;
+}

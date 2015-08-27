@@ -26,8 +26,9 @@ public final class MigrationPlan: NSObject {
 			}
 			if let modelURLs = bundle.URLsForResourcesWithExtension("momd", subdirectory: nil) as? [NSURL] {
 				for modelBundleURL in modelURLs {
-					let modelBundle = NSBundle(URL: modelBundleURL)
-					if let modelURLs = bundle.URLsForResourcesWithExtension("mom", subdirectory: nil) as? [NSURL] {
+					if let modelBundle = NSBundle(URL: modelBundleURL),
+						modelURLs = modelBundle.URLsForResourcesWithExtension("mom", subdirectory: nil) as? [NSURL]
+					{
 						for modelURL in modelURLs {
 							if let model = NSManagedObjectModel(contentsOfURL: modelURL) {
 								models.append(model)

@@ -43,6 +43,7 @@ public final class MigrationPlan: NSObject {
 	
 	public init?(storeMetadata: [NSObject: AnyObject], destinationModel: NSManagedObjectModel, bundles: [NSBundle], inout error: NSError?) {
 		precondition(!bundles.isEmpty, "Bundles must be non-empty.")
+		let progress = NSProgress(totalUnitCount: -1)
 		if destinationModel.isConfiguration(nil, compatibleWithStoreMetadata: storeMetadata) {
 			super.init()
 			return
@@ -101,7 +102,7 @@ public final class MigrationPlan: NSObject {
 			return true
 		}
 		// 10% setup, 80% actual migration steps, 10% cleanup.
-		let overallProgress = NSProgress(totalUnitCount: Int64(steps.count))
+		let overallProgress = NSProgress(totalUnitCount: 100)
 		
 		// Setup
 		var storeReplacementDirectoryError: NSError?
@@ -121,15 +122,17 @@ public final class MigrationPlan: NSObject {
 		var storeCopyError: NSError?
 		for (stepIndex, step) in enumerate(steps) {
 			let stepDestinationURL = storeReplacementDirectory.URLByAppendingPathComponent("Migrated Store (Step \(stepIndex + 1) of \(stepCount))", isDirectory: false)
+			steppingProgress.becomeCurrentWithPendingUnitCount(1)
 			var stepError: NSError?
-			if !step.executeForStoreAtURL(latestStoreURL, type: latestStoreType, destinationURL: stepDestinationURL, storeType: destinationStoreType, error: &stepError) {
+			let stepSucceeded = step.executeForStoreAtURL(latestStoreURL, type: latestStoreType, destinationURL: stepDestinationURL, storeType: destinationStoreType, error: &stepError)
+			steppingProgress.resignCurrent()
+			if !stepSucceeded {
 				error = stepError
 				NSFileManager.defaultManager().removeItemAtURL(storeReplacementDirectory, error: nil)
 				return false
 			}
 			latestStoreURL = stepDestinationURL
 			latestStoreType = destinationStoreType
-			steppingProgress.completedUnitCount++
 		}
 		
 		// Cleanup

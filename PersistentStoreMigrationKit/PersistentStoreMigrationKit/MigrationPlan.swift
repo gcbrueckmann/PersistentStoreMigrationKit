@@ -97,6 +97,9 @@ public final class MigrationPlan: NSObject {
 	}
 	
 	public func executeForStoreAtURL(sourceURL: NSURL, type sourceStoreType: String, destinationURL: NSURL, storeType destinationStoreType: String, inout error: NSError?) -> Bool {
+		if isEmpty {
+			return true
+		}
 		// 10% setup, 80% actual migration steps, 10% cleanup.
 		let overallProgress = NSProgress(totalUnitCount: Int64(steps.count))
 		

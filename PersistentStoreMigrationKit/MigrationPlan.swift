@@ -17,17 +17,17 @@ public final class MigrationPlan: NSObject {
 	private static func modelsInBundles(bundles: [NSBundle]) -> [NSManagedObjectModel] {
 		var models = [NSManagedObjectModel]()
 		for bundle in bundles {
-			if let modelURLs = bundle.URLsForResourcesWithExtension("mom", subdirectory: nil) as? [NSURL] {
+			if let modelURLs = bundle.URLsForResourcesWithExtension("mom", subdirectory: nil) {
 				for modelURL in modelURLs {
 					if let model = NSManagedObjectModel(contentsOfURL: modelURL) {
 						models.append(model)
 					}
 				}
 			}
-			if let modelURLs = bundle.URLsForResourcesWithExtension("momd", subdirectory: nil) as? [NSURL] {
+			if let modelURLs = bundle.URLsForResourcesWithExtension("momd", subdirectory: nil) {
 				for modelBundleURL in modelURLs {
 					if let modelBundle = NSBundle(URL: modelBundleURL),
-						modelURLs = modelBundle.URLsForResourcesWithExtension("mom", subdirectory: nil) as? [NSURL]
+						modelURLs = modelBundle.URLsForResourcesWithExtension("mom", subdirectory: nil)
 					{
 						for modelURL in modelURLs {
 							if let model = NSManagedObjectModel(contentsOfURL: modelURL) {
@@ -41,9 +41,9 @@ public final class MigrationPlan: NSObject {
 		return models
 	}
 	
-	public init?(storeMetadata: [NSObject: AnyObject], destinationModel: NSManagedObjectModel, bundles: [NSBundle], inout error: NSError?) {
+	public init(storeMetadata: [String: AnyObject], destinationModel: NSManagedObjectModel, bundles: [NSBundle]) throws {
 		precondition(!bundles.isEmpty, "Bundles must be non-empty.")
-		let progress = NSProgress(totalUnitCount: -1)
+		let _ = NSProgress(totalUnitCount: -1)
 		if destinationModel.isConfiguration(nil, compatibleWithStoreMetadata: storeMetadata) {
 			super.init()
 			return
@@ -63,8 +63,7 @@ public final class MigrationPlan: NSObject {
 				super.init()
 				let localizedErrorDescriptionFormat = NSLocalizedString("Could not find the source model for migration step %lu.", tableName: "PersistentStoreMigrationKit", comment: "Error description when the source model for a migration step cannot be located in the specified bundles.")
 				let localizedErrorDescription = NSString.localizedStringWithFormat(localizedErrorDescriptionFormat, migrationStepIndex + 1)
-				error = NSError(persistentStoreMigrationKitCode: .CouldNotFindSourceModel, userInfo: [NSLocalizedDescriptionKey: localizedErrorDescription])
-				return nil
+				throw NSError(persistentStoreMigrationKitCode: .CouldNotFindSourceModel, userInfo: [NSLocalizedDescriptionKey: localizedErrorDescription])
 			}
 			var stepDestinationModel: NSManagedObjectModel!
 			var stepMappingModel: NSMappingModel!
@@ -81,35 +80,38 @@ public final class MigrationPlan: NSObject {
 				super.init()
 				let localizedErrorDescriptionFormat = NSLocalizedString("Could not find a destination and mapping model for migration step %lu.", tableName: "PersistentStoreMigrationKit", comment: "Error description when the destination and mapping model for a migration step cannot be located in the specified bundles.")
 				let localizedErrorDescription = NSString.localizedStringWithFormat(localizedErrorDescriptionFormat, migrationStepIndex + 1)
-				error = NSError(persistentStoreMigrationKitCode: .CouldNotInferMappingSteps, userInfo: [NSLocalizedDescriptionKey: localizedErrorDescription])
-				return nil
+				throw NSError(persistentStoreMigrationKitCode: .CouldNotInferMappingSteps, userInfo: [NSLocalizedDescriptionKey: localizedErrorDescription])
 			}
 			latestModelVersionHashes = stepDestinationModel.entityVersionHashesByName
-			let stepMigrationManager = NSMigrationManager(sourceModel: stepSourceModel, destinationModel: stepDestinationModel)
 			let migrationStep = MigrationStep(sourceModel: stepSourceModel, destinationModel: stepDestinationModel, mappingModel: stepMappingModel)
 			steps.append(migrationStep)
 		}
 		if steps.isEmpty {
 			super.init()
-			error = NSError(persistentStoreMigrationKitCode: .CouldNotInferMappingSteps, userInfo: nil)
-			return nil
+			throw NSError(persistentStoreMigrationKitCode: .CouldNotInferMappingSteps, userInfo: nil)
 		}
 		super.init()
 	}
 	
-	public func executeForStoreAtURL(sourceURL: NSURL, type sourceStoreType: String, destinationURL: NSURL, storeType destinationStoreType: String, inout error: NSError?) -> Bool {
+	public func executeForStoreAtURL(sourceURL: NSURL, type sourceStoreType: String, destinationURL: NSURL, storeType destinationStoreType: String) throws {
+		var error: NSError! = NSError(domain: "Migrator", code: 0, userInfo: nil)
 		if isEmpty {
-			return true
+			return
 		}
 		// 10% setup, 80% actual migration steps, 10% cleanup.
 		let overallProgress = NSProgress(totalUnitCount: 100)
 		
 		// Setup
 		var storeReplacementDirectoryError: NSError?
-		let storeReplacementDirectory: NSURL! = NSFileManager.defaultManager().URLForDirectory(.ItemReplacementDirectory, inDomain: .UserDomainMask, appropriateForURL: destinationURL, create: true, error: &storeReplacementDirectoryError)
+		let storeReplacementDirectory: NSURL!
+		do {
+			storeReplacementDirectory = try NSFileManager.defaultManager().URLForDirectory(.ItemReplacementDirectory, inDomain: .UserDomainMask, appropriateForURL: destinationURL, create: true)
+		} catch let error as NSError {
+			storeReplacementDirectoryError = error
+			storeReplacementDirectory = nil
+		}
 		if storeReplacementDirectory == nil {
-			error = storeReplacementDirectoryError
-			return false
+			throw storeReplacementDirectoryError!
 		}
 		overallProgress.completedUnitCount += 10
 		
@@ -119,31 +121,39 @@ public final class MigrationPlan: NSObject {
 		overallProgress.resignCurrent()
 		var latestStoreURL = sourceURL
 		var latestStoreType = sourceStoreType
-		var storeCopyError: NSError?
-		for (stepIndex, step) in enumerate(steps) {
+		for (stepIndex, step) in steps.enumerate() {
 			let stepDestinationURL = storeReplacementDirectory.URLByAppendingPathComponent("Migrated Store (Step \(stepIndex + 1) of \(stepCount))", isDirectory: false)
 			steppingProgress.becomeCurrentWithPendingUnitCount(1)
 			var stepError: NSError?
-			let stepSucceeded = step.executeForStoreAtURL(latestStoreURL, type: latestStoreType, destinationURL: stepDestinationURL, storeType: destinationStoreType, error: &stepError)
+			let stepSucceeded: Bool
+			do {
+				try step.executeForStoreAtURL(latestStoreURL, type: latestStoreType, destinationURL: stepDestinationURL, storeType: destinationStoreType)
+				stepSucceeded = true
+			} catch let error as NSError {
+				stepError = error
+				stepSucceeded = false
+			}
 			steppingProgress.resignCurrent()
 			if !stepSucceeded {
 				error = stepError
-				NSFileManager.defaultManager().removeItemAtURL(storeReplacementDirectory, error: nil)
-				return false
+				do {
+					try NSFileManager.defaultManager().removeItemAtURL(storeReplacementDirectory)
+				} catch _ {
+				}
+				throw error
 			}
 			latestStoreURL = stepDestinationURL
 			latestStoreType = destinationStoreType
 		}
 		
 		// Cleanup
-		var storeReplacementError: NSError?
-		if !NSFileManager.defaultManager().replaceItemAtURL(destinationURL, withItemAtURL: latestStoreURL, backupItemName: nil, options: .allZeros, resultingItemURL: nil, error: &storeReplacementError) {
-			error = storeReplacementError
-			NSFileManager.defaultManager().removeItemAtURL(storeReplacementDirectory, error: nil)
-			return false
+		do {
+			try NSFileManager.defaultManager().replaceItemAtURL(destinationURL, withItemAtURL: latestStoreURL, backupItemName: nil, options: [], resultingItemURL: nil)
+		} catch let storeReplacementError as NSError {
+			let _ = try? NSFileManager.defaultManager().removeItemAtURL(storeReplacementDirectory)
+			throw storeReplacementError
 		}
-		NSFileManager.defaultManager().removeItemAtURL(storeReplacementDirectory, error: nil)
+		let _ = try? NSFileManager.defaultManager().removeItemAtURL(storeReplacementDirectory)
 		overallProgress.completedUnitCount += 10
-		return true
 	}
 }

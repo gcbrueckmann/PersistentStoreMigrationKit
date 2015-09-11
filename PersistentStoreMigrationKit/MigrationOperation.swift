@@ -48,24 +48,30 @@ public final class MigrationOperation: NSOperation {
 		precondition(bundles != nil, "Missing bundles.")
 		state = .Executing
 		
-		var metadataError: NSError?
-		let existingStoreMetadata: [NSObject: AnyObject]! = NSPersistentStoreCoordinator.metadataForPersistentStoreOfType(sourceStoreType, URL: sourceURL, error: &metadataError)
+		let existingStoreMetadata: [String: AnyObject]
+		do {
+			existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStoreOfType(sourceStoreType, URL: sourceURL)
+		} catch let metadataError as NSError {
+			cancelWithError(metadataError)
+			return
+		}
 		
 		// Devise migration plan.
-		var migrationPlanError: NSError?
-		let migrationPlan: MigrationPlan! = MigrationPlan(storeMetadata: existingStoreMetadata, destinationModel: destinationModel, bundles: bundles, error: &migrationPlanError)
-		if migrationPlan == nil {
-			cancelWithError(migrationPlanError!)
+		let migrationPlan: MigrationPlan
+		do {
+			migrationPlan = try MigrationPlan(storeMetadata: existingStoreMetadata, destinationModel: destinationModel, bundles: bundles)
+		} catch let migrationPlanError as NSError {
+			cancelWithError(migrationPlanError)
 			return
 		}
 		progress.completedUnitCount += 10
 		
 		// Execute migration plan.
 		progress.becomeCurrentWithPendingUnitCount(90)
-		var migrationPlanExecutionError: NSError?
-		let migrationSucceeded = migrationPlan.executeForStoreAtURL(sourceURL, type: sourceStoreType, destinationURL: destinationURL, storeType: destinationStoreType, error: &migrationPlanExecutionError)
-		if !migrationSucceeded {
-			cancelWithError(migrationPlanExecutionError!)
+		do {
+			try migrationPlan.executeForStoreAtURL(sourceURL, type: sourceStoreType, destinationURL: destinationURL, storeType: destinationStoreType)
+		} catch let migrationPlanExecutionError as NSError {
+			cancelWithError(migrationPlanExecutionError)
 			return
 		}
 		progress.resignCurrent()

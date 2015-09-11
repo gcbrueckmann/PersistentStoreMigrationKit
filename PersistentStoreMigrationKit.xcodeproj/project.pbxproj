@@ -185,6 +185,8 @@
 		EDA89C201B8DEE7F00E9B761 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftMigration = 0700;
+				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0640;
 				ORGANIZATIONNAME = "Georg C. Brückmann";
 				TargetAttributes = {

@@ -25,24 +25,12 @@ final class MigrationStep: NSObject {
 	private var progress: NSProgress?
 	
 	func executeForStoreAtURL(sourceURL: NSURL, type sourceStoreType: String, destinationURL: NSURL, storeType destinationStoreType: String) throws {
-		var error: NSError! = NSError(domain: "Migrator", code: 0, userInfo: nil)
 		progress = NSProgress(totalUnitCount: 100)
+		defer { progress = nil }
 		let migrationManager = NSMigrationManager(sourceModel: sourceModel, destinationModel: destinationModel)
 		migrationManager.addObserver(self, forKeyPath: "migrationProgress", options: .New, context: &keyValueObservingContext)
-		let migrationSucceeded: Bool
-		do {
-			try migrationManager.migrateStoreFromURL(sourceURL, type: sourceStoreType, options: nil, withMappingModel: mappingModel, toDestinationURL: destinationURL, destinationType: destinationStoreType, destinationOptions: nil)
-			migrationSucceeded = true
-		} catch let error1 as NSError {
-			error = error1
-			migrationSucceeded = false
-		}
-		migrationManager.removeObserver(self, forKeyPath: "migrationProgress", context: &keyValueObservingContext)
-		progress = nil
-		if migrationSucceeded {
-			return
-		}
-		throw error
+		defer { migrationManager.removeObserver(self, forKeyPath: "migrationProgress", context: &keyValueObservingContext) }
+		try migrationManager.migrateStoreFromURL(sourceURL, type: sourceStoreType, options: nil, withMappingModel: mappingModel, toDestinationURL: destinationURL, destinationType: destinationStoreType, destinationOptions: nil)
 	}
 	
 	// MARK: NSKeyValueObserving

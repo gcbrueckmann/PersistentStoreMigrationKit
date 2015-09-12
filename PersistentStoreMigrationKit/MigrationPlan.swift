@@ -123,23 +123,13 @@ public final class MigrationPlan: NSObject {
 		var latestStoreType = sourceStoreType
 		for (stepIndex, step) in steps.enumerate() {
 			let stepDestinationURL = storeReplacementDirectory.URLByAppendingPathComponent("Migrated Store (Step \(stepIndex + 1) of \(stepCount))", isDirectory: false)
-			steppingProgress.becomeCurrentWithPendingUnitCount(1)
-			var stepError: NSError?
-			let stepSucceeded: Bool
+			var stepError: ErrorType?
 			do {
+				steppingProgress.becomeCurrentWithPendingUnitCount(1)
+				defer { steppingProgress.resignCurrent() }
 				try step.executeForStoreAtURL(latestStoreURL, type: latestStoreType, destinationURL: stepDestinationURL, storeType: destinationStoreType)
-				stepSucceeded = true
-			} catch let error as NSError {
-				stepError = error
-				stepSucceeded = false
-			}
-			steppingProgress.resignCurrent()
-			if !stepSucceeded {
-				error = stepError
-				do {
-					try NSFileManager.defaultManager().removeItemAtURL(storeReplacementDirectory)
-				} catch _ {
-				}
+			} catch {
+				let _ = try? NSFileManager.defaultManager().removeItemAtURL(storeReplacementDirectory)
 				throw error
 			}
 			latestStoreURL = stepDestinationURL

@@ -206,6 +206,24 @@ class PersistentStoreMigrationKitTests: XCTestCase {
 			try persistentStoreCoordinator.addPersistentStoreWithType(storeType, configuration: nil, URL: storeURL, options: nil)
 		} catch {
 			XCTFail("Could not load persistent store after migration: \(error)")
+			return
+		}
+	}
+	
+	func testMigrationFailure() {
+		let storeURL = workingDirectoryURL.URLByAppendingPathComponent("Store That Does Not Exist", isDirectory: false)
+		let latestModel = models.last!
+		let existingStoreMetadata: [String: AnyObject]
+		do {
+			existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStoreOfType(storeType, URL: storeURL)
+		} catch {
+			XCTFail("Could not retrieve store metadata: \(error)")
+			existingStoreMetadata = [:]
+		}
+		do {
+			let _ = try MigrationPlan(storeMetadata: existingStoreMetadata, destinationModel: latestModel, bundles: [testBundle])
+		} catch {
+			XCTFail("Could not devise migration plan for \(storeURL): \(error)")
 		}
 	}
 }

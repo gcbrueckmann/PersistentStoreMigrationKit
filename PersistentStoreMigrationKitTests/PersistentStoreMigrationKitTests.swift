@@ -19,11 +19,9 @@ class PersistentStoreMigrationKitTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-		
 		testBundle = NSBundle(forClass: self.dynamicType)
 		
-		let modelVersions = 1...3
-		for versionNumber in modelVersions {
+		for versionNumber in 1...3 {
 			let modelURL: NSURL! = testBundle.URLForResource("TestModelV\(versionNumber)", withExtension: "mom")
 			XCTAssertNotNil(modelURL, "Could not locate V\(versionNumber) test model.")
 			let model: NSManagedObjectModel! = NSManagedObjectModel(contentsOfURL: modelURL)
@@ -188,6 +186,7 @@ class PersistentStoreMigrationKitTests: XCTestCase {
 		let existingStoreVersionHashes = existingStoreMetadata[NSStoreModelVersionHashesKey] as! [String: AnyObject]!
 		XCTAssertNotNil(existingStoreVersionHashes, "Could not retrieve version hashes from \(storeURL).")
 		
+		let operationExpectation = expectationWithDescription("Migration operation succeeded")
 		let operationQueue = NSOperationQueue()
 		operationQueue.name = "Core Data Migration Test"
 		let migrationOperation = MigrationOperation()
@@ -197,16 +196,22 @@ class PersistentStoreMigrationKitTests: XCTestCase {
 		migrationOperation.destinationStoreType = storeType
 		migrationOperation.destinationModel = latestModel
 		migrationOperation.bundles = [testBundle]
+		migrationOperation.completionBlock = {
+			XCTAssertNil(migrationOperation.error, "Migration operation failed: \(migrationOperation.error)")
+			operationExpectation.fulfill()
+		}
 		operationQueue.addOperation(migrationOperation)
-		operationQueue.waitUntilAllOperationsAreFinished()
-		XCTAssertNil(migrationOperation.error, "Migration operation failed: \(migrationOperation.error)")
-		
-		let persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: latestModel)
-		do {
-			try persistentStoreCoordinator.addPersistentStoreWithType(storeType, configuration: nil, URL: storeURL, options: nil)
-		} catch {
-			XCTFail("Could not load persistent store after migration: \(error)")
-			return
+		waitForExpectationsWithTimeout(10) { error in
+			if error != nil {
+				return
+			}
+			let persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: latestModel)
+			do {
+				try persistentStoreCoordinator.addPersistentStoreWithType(self.storeType, configuration: nil, URL: storeURL, options: nil)
+			} catch {
+				XCTFail("Could not load persistent store after migration: \(error)")
+				return
+			}
 		}
 	}
 	
@@ -216,14 +221,13 @@ class PersistentStoreMigrationKitTests: XCTestCase {
 		let existingStoreMetadata: [String: AnyObject]
 		do {
 			existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStoreOfType(storeType, URL: storeURL)
+			XCTFail("Retrieving store metadata for nonexistant store succeeded: \(existingStoreMetadata)")
 		} catch {
-			XCTFail("Could not retrieve store metadata: \(error)")
 			existingStoreMetadata = [:]
 		}
 		do {
-			let _ = try MigrationPlan(storeMetadata: existingStoreMetadata, destinationModel: latestModel, bundles: [testBundle])
-		} catch {
-			XCTFail("Could not devise migration plan for \(storeURL): \(error)")
-		}
+			let migrationPlan = try MigrationPlan(storeMetadata: existingStoreMetadata, destinationModel: latestModel, bundles: [testBundle])
+			XCTFail("Devising migration plan for nonexistant store succeeded: \(migrationPlan)")
+		} catch {}
 	}
 }

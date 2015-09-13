@@ -48,13 +48,17 @@ public final class MigrationPlan: NSObject {
 			super.init()
 			return
 		}
-		var latestModelVersionHashes = storeMetadata[NSStoreModelVersionHashesKey] as! [NSObject: AnyObject]!
-		precondition(latestModelVersionHashes != nil, "Model version hashes missing from store metadata.")
-		let modles = self.dynamicType.modelsInBundles(bundles)
+		guard let storeModelVersionHashes = storeMetadata[NSStoreModelVersionHashesKey] as? [String: AnyObject] else {
+			super.init()
+			let localizedErrorDescription = NSLocalizedString("Model version hashes are missing from store metadata.", tableName: "PersistentStoreMigrationKit", comment: "Error description when the store metadata does not contain version hashes for the model used to create it.")
+			throw NSError(persistentStoreMigrationKitCode: .MissingStoreModelVersionHashes, userInfo: [NSLocalizedDescriptionKey: localizedErrorDescription])
+		}
+		var latestModelVersionHashes = storeModelVersionHashes
+		let models = self.dynamicType.modelsInBundles(bundles)
 		while !(latestModelVersionHashes as NSDictionary).isEqualToDictionary(destinationModel.entityVersionHashesByName) {
 			let migrationStepIndex = steps.count
 			var stepSourceModel: NSManagedObjectModel!
-			for model in modles {
+			for model in models {
 				if (model.entityVersionHashesByName as NSDictionary).isEqualToDictionary(latestModelVersionHashes) {
 					stepSourceModel = model
 				}
@@ -67,7 +71,7 @@ public final class MigrationPlan: NSObject {
 			}
 			var stepDestinationModel: NSManagedObjectModel!
 			var stepMappingModel: NSMappingModel!
-			for model in modles {
+			for model in models {
 				if let mappingModel = NSMappingModel(fromBundles: bundles, forSourceModel: stepSourceModel, destinationModel: model) {
 					stepDestinationModel = model
 					stepMappingModel = mappingModel

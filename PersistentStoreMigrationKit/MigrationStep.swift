@@ -24,23 +24,22 @@ final class MigrationStep: NSObject {
 	
 	private var progress: NSProgress?
 	
-	func executeForStoreAtURL(sourceURL: NSURL, type sourceStoreType: String, destinationURL: NSURL, storeType destinationStoreType: String, inout error: NSError?) -> Bool {
+	func executeForStoreAtURL(sourceURL: NSURL, type sourceStoreType: String, destinationURL: NSURL, storeType destinationStoreType: String) throws {
 		progress = NSProgress(totalUnitCount: 100)
+		defer { progress = nil }
 		let migrationManager = NSMigrationManager(sourceModel: sourceModel, destinationModel: destinationModel)
 		migrationManager.addObserver(self, forKeyPath: "migrationProgress", options: .New, context: &keyValueObservingContext)
-		let migrationSucceeded = migrationManager.migrateStoreFromURL(sourceURL, type: sourceStoreType, options: nil, withMappingModel: mappingModel, toDestinationURL: destinationURL, destinationType: destinationStoreType, destinationOptions: nil, error: &error)
-		migrationManager.removeObserver(self, forKeyPath: "migrationProgress", context: &keyValueObservingContext)
-		progress = nil
-		return migrationSucceeded
+		defer { migrationManager.removeObserver(self, forKeyPath: "migrationProgress", context: &keyValueObservingContext) }
+		try migrationManager.migrateStoreFromURL(sourceURL, type: sourceStoreType, options: nil, withMappingModel: mappingModel, toDestinationURL: destinationURL, destinationType: destinationStoreType, destinationOptions: nil)
 	}
 	
 	// MARK: NSKeyValueObserving
-	override func observeValueForKeyPath(keyPath: String, ofObject object: AnyObject, change: [NSObject : AnyObject], context: UnsafeMutablePointer<Void>) {
+	override func observeValueForKeyPath(keyPath: String!, ofObject object: AnyObject!, change: [String : AnyObject]!, context: UnsafeMutablePointer<Void>) {
 		if context != &keyValueObservingContext {
 			super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
 			return
 		}
-		if let migrationManager = object as? NSMigrationManager {
+		if let _ = object as? NSMigrationManager {
 			switch keyPath {
 			case "migrationProgress":
 				let newMigrationProgress = (change[NSKeyValueChangeNewKey] as! NSNumber).floatValue

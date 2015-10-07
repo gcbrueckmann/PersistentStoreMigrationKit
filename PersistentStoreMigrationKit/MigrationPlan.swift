@@ -68,7 +68,6 @@ public final class MigrationPlan: NSObject {
 		var latestModelVersionHashes = storeModelVersionHashes
 		let models = self.dynamicType.modelsInBundles(bundles)
 		while !(latestModelVersionHashes as NSDictionary).isEqualToDictionary(destinationModel.entityVersionHashesByName) {
-			let migrationStepIndex = steps.count
 			var stepSourceModel: NSManagedObjectModel!
 			for model in models {
 				if (model.entityVersionHashesByName as NSDictionary).isEqualToDictionary(latestModelVersionHashes) {

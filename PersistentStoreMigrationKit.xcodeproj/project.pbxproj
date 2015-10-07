@@ -11,7 +11,6 @@
 		ED27A2C61B8F46B9005FAFCB /* ModelV1ToModelV2.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = EDA89C4E1B8DF0B500E9B761 /* ModelV1ToModelV2.xcmappingmodel */; };
 		ED27A2C71B8F46BC005FAFCB /* TestModelV2.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = EDA89C571B8DF15B00E9B761 /* TestModelV2.xcdatamodel */; };
 		ED69308F1B8E306700F9493D /* MigrationPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED69308E1B8E306700F9493D /* MigrationPlan.swift */; };
-		ED6930911B8E45A100F9493D /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6930901B8E45A100F9493D /* Errors.swift */; };
 		ED6930931B8E4E0300F9493D /* MigrationStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6930921B8E4E0300F9493D /* MigrationStep.swift */; };
 		EDA89C2F1B8DEE7F00E9B761 /* PersistentStoreMigrationKit.h in Headers */ = {isa = PBXBuildFile; fileRef = EDA89C2E1B8DEE7F00E9B761 /* PersistentStoreMigrationKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EDA89C351B8DEE7F00E9B761 /* PersistentStoreMigrationKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDA89C291B8DEE7F00E9B761 /* PersistentStoreMigrationKit.framework */; };
@@ -33,7 +32,6 @@
 
 /* Begin PBXFileReference section */
 		ED69308E1B8E306700F9493D /* MigrationPlan.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MigrationPlan.swift; sourceTree = "<group>"; };
-		ED6930901B8E45A100F9493D /* Errors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
 		ED6930921B8E4E0300F9493D /* MigrationStep.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MigrationStep.swift; sourceTree = "<group>"; };
 		EDA89C291B8DEE7F00E9B761 /* PersistentStoreMigrationKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PersistentStoreMigrationKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EDA89C2D1B8DEE7F00E9B761 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -90,7 +88,6 @@
 			isa = PBXGroup;
 			children = (
 				EDA89C2E1B8DEE7F00E9B761 /* PersistentStoreMigrationKit.h */,
-				ED6930901B8E45A100F9493D /* Errors.swift */,
 				EDA89C451B8DEEA800E9B761 /* MigrationOperation.swift */,
 				ED69308E1B8E306700F9493D /* MigrationPlan.swift */,
 				ED6930921B8E4E0300F9493D /* MigrationStep.swift */,
@@ -240,7 +237,6 @@
 			files = (
 				ED6930931B8E4E0300F9493D /* MigrationStep.swift in Sources */,
 				EDA89C461B8DEEA800E9B761 /* MigrationOperation.swift in Sources */,
-				ED6930911B8E45A100F9493D /* Errors.swift in Sources */,
 				ED69308F1B8E306700F9493D /* MigrationPlan.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -50,8 +50,7 @@ public final class MigrationPlan: NSObject {
 		}
 		guard let storeModelVersionHashes = storeMetadata[NSStoreModelVersionHashesKey] as? [String: AnyObject] else {
 			super.init()
-			let localizedErrorDescription = NSLocalizedString("Model version hashes are missing from store metadata.", tableName: "PersistentStoreMigrationKit", comment: "Error description when the store metadata does not contain version hashes for the model used to create it.")
-			throw NSError(persistentStoreMigrationKitCode: .MissingStoreModelVersionHashes, userInfo: [NSLocalizedDescriptionKey: localizedErrorDescription])
+			throw Error.MissingStoreModelVersionHashes
 		}
 		var latestModelVersionHashes = storeModelVersionHashes
 		let models = self.dynamicType.modelsInBundles(bundles)
@@ -65,9 +64,7 @@ public final class MigrationPlan: NSObject {
 			}
 			if stepSourceModel == nil {
 				super.init()
-				let localizedErrorDescriptionFormat = NSLocalizedString("Could not find the source model for migration step %lu.", tableName: "PersistentStoreMigrationKit", comment: "Error description when the source model for a migration step cannot be located in the specified bundles.")
-				let localizedErrorDescription = NSString.localizedStringWithFormat(localizedErrorDescriptionFormat, migrationStepIndex + 1)
-				throw NSError(persistentStoreMigrationKitCode: .CouldNotFindSourceModel, userInfo: [NSLocalizedDescriptionKey: localizedErrorDescription])
+				throw Error.CouldNotFindSourceModel
 			}
 			var stepDestinationModel: NSManagedObjectModel!
 			var stepMappingModel: NSMappingModel!
@@ -82,9 +79,7 @@ public final class MigrationPlan: NSObject {
 				stepMappingModel == nil
 			{
 				super.init()
-				let localizedErrorDescriptionFormat = NSLocalizedString("Could not find a destination and mapping model for migration step %lu.", tableName: "PersistentStoreMigrationKit", comment: "Error description when the destination and mapping model for a migration step cannot be located in the specified bundles.")
-				let localizedErrorDescription = NSString.localizedStringWithFormat(localizedErrorDescriptionFormat, migrationStepIndex + 1)
-				throw NSError(persistentStoreMigrationKitCode: .CouldNotInferMappingSteps, userInfo: [NSLocalizedDescriptionKey: localizedErrorDescription])
+				throw Error.CouldNotInferMappingSteps
 			}
 			latestModelVersionHashes = stepDestinationModel.entityVersionHashesByName
 			let migrationStep = MigrationStep(sourceModel: stepSourceModel, destinationModel: stepDestinationModel, mappingModel: stepMappingModel)
@@ -92,7 +87,7 @@ public final class MigrationPlan: NSObject {
 		}
 		if steps.isEmpty {
 			super.init()
-			throw NSError(persistentStoreMigrationKitCode: .CouldNotInferMappingSteps, userInfo: nil)
+			throw Error.CouldNotInferMappingSteps
 		}
 		super.init()
 	}
@@ -149,5 +144,16 @@ public final class MigrationPlan: NSObject {
 		}
 		let _ = try? NSFileManager.defaultManager().removeItemAtURL(storeReplacementDirectory)
 		overallProgress.completedUnitCount += 10
+	}
+}
+
+public extension MigrationPlan {
+	public enum Error: ErrorType {
+		/// Model version hashes are missing from store metadata.
+		case MissingStoreModelVersionHashes
+		/// Could not find the source model for a migration step.
+		case CouldNotFindSourceModel
+		/// Could not find a destination and mapping model for a migration step.
+		case CouldNotInferMappingSteps
 	}
 }

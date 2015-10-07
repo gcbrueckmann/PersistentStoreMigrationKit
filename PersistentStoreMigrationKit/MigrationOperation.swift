@@ -43,7 +43,6 @@ public final class MigrationOperation: NSOperation {
 		case Ready
 		/// The migration operation is executing.
 		case Executing
-		case Failed
 		/// The migration operation has finished executing.
 		case Finished
 		/// The migration operation has been cancelled.

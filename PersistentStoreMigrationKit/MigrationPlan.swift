@@ -9,9 +9,12 @@
 import Foundation
 import CoreData
 
+/// A `MigrationPlan` instance encapsulates the progressive migration from one `NSManagedObjectModel` to another with an arbitrary number of intermediate models.
 public final class MigrationPlan: NSObject {
 	private var steps = [MigrationStep]()
+	/// The number of steps in the plan. Zero, if the plan is empty.
 	public var stepCount: Int { return steps.count }
+	/// Indicates whether executing the plan will do nothing.
 	public var isEmpty: Bool { return stepCount == 0 }
 	
 	private static func modelsInBundles(bundles: [NSBundle]) -> [NSManagedObjectModel] {
@@ -41,6 +44,16 @@ public final class MigrationPlan: NSObject {
 		return models
 	}
 	
+	/// Devises a migration plan based on the metadata of an existing store, a destination managed object model and a list of bundles to search for intermediate models.
+	/// 
+	/// If no migration is necessary (i.e. the existing store's metadata is compatible with the destination model), the initialized plan will be empty.
+	/// 
+	/// - Throws: Throws an error if a migration plan cannot be devised.
+	/// 
+	/// - Parameters:
+	///   - storeMetadata: The metadata of an existing persistent store.
+	///   - destinationModel: The model to migrate to.
+	///   - bundles: A list of bundles to search for the source model and intermediate models.
 	public init(storeMetadata: [String: AnyObject], destinationModel: NSManagedObjectModel, bundles: [NSBundle]) throws {
 		precondition(!bundles.isEmpty, "Bundles must be non-empty.")
 		let _ = NSProgress(totalUnitCount: -1)
@@ -92,6 +105,16 @@ public final class MigrationPlan: NSObject {
 		super.init()
 	}
 	
+	/// Performs the migration from the persistent store identified by `sourceURL` to `destinationModel`, saving the result in the persistent store identified by `destinationURL`.
+	/// The migration is guaranteed to be atomic.
+	/// 
+	/// Inserts an `NSProgress` instance into the current progress tree.
+	/// 
+	/// - Parameters:
+	///   - sourceURL: Identifies the persistent store to migrate from.
+	///   - sourceStoreType: A string constant (such as `NSSQLiteStoreType`) that specifies the source store type.
+	///   - destinationURL: Identifies the persistent store to migrate to. May be identical to `sourceURL`.
+	///   - destinationStoreType: A string constant (such as `NSSQLiteStoreType`) that specifies the destination store type.
 	public func executeForStoreAtURL(sourceURL: NSURL, type sourceStoreType: String, destinationURL: NSURL, storeType destinationStoreType: String) throws {
 		var error: NSError! = NSError(domain: "Migrator", code: 0, userInfo: nil)
 		if isEmpty {

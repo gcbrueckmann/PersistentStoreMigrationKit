@@ -11,49 +11,49 @@ import CoreData
 
 /// A `MigrationOperation` instance encapsulates the progressive migration from one `NSManagedObjectModel` to another with an arbitrary number of intermediate models.
 /// This is a companion to and implemented on top of the `MigrationPlan` class.
-public final class MigrationOperation: NSOperation {
+public final class MigrationOperation: Operation {
 	/// Identifies the persistent store to migrate from.
-	public var sourceURL: NSURL!
+	public var sourceURL: URL!
 	/// A string constant (such as `NSSQLiteStoreType`) that specifies the source store type.
 	public var sourceStoreType: String!
 	/// Identifies the persistent store to migrate to. May be identical to `sourceURL`.
-	public var destinationURL: NSURL!
+	public var destinationURL: URL!
 	/// A string constant (such as `NSSQLiteStoreType`) that specifies the destination store type.
 	public var destinationStoreType: String!
 	/// The model to migrate to.
 	public var destinationModel: NSManagedObjectModel!
 	/// A list of bundles to search for the source model and intermediate models.
-	public var bundles: [NSBundle]!
+	public var bundles: [Bundle]!
 	/// The overall progress of the migration operation.
-	public let progress: NSProgress
+	public let progress: Progress
 	/// Any error that may have occured during the execution of the migration operation.
-	public private(set) var error: ErrorType?
+	public private(set) var error: Error?
 	
 	/// Initializes a migration operation.
 	/// 
 	/// Inserts an `NSProgress` instance into the current progress tree.
 	override public required init() {
-		progress = NSProgress(totalUnitCount: 100)
+		progress = Progress(totalUnitCount: 100)
 		super.init()
 	}
 	
 	/// Defines possible migration operation states.
 	@objc public enum State: Int {
 		/// The migration operation is ready to execute.
-		case Ready
+		case ready
 		/// The migration operation is executing.
-		case Executing
+		case executing
 		/// The migration operation has finished executing.
-		case Finished
+		case finished
 		/// The migration operation has been cancelled.
-		case Cancelled
+		case cancelled
 	}
 	/// The current state of the migration operation.
-	private(set) public dynamic var state = State.Ready
+	fileprivate(set) public dynamic var state = State.ready
 	
-	private func cancelWithError(error: NSError) {
+	fileprivate func cancelWithError(_ error: NSError) {
 		self.error = error
-		state = .Cancelled
+		state = .cancelled
 	}
 	
 	// MARK: NSOperation
@@ -64,11 +64,11 @@ public final class MigrationOperation: NSOperation {
 		precondition(destinationStoreType != nil, "Missing desetination store type.")
 		precondition(destinationModel != nil, "Missing destination model.")
 		precondition(bundles != nil, "Missing bundles.")
-		state = .Executing
+		state = .executing
 		
 		let existingStoreMetadata: [String: AnyObject]
 		do {
-			existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStoreOfType(sourceStoreType, URL: sourceURL)
+			existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: sourceStoreType, at: sourceURL) as [String : AnyObject]
 		} catch let metadataError as NSError {
 			cancelWithError(metadataError)
 			return
@@ -85,7 +85,7 @@ public final class MigrationOperation: NSOperation {
 		progress.completedUnitCount += 10
 		
 		// Execute migration plan.
-		progress.becomeCurrentWithPendingUnitCount(90)
+		progress.becomeCurrent(withPendingUnitCount: 90)
 		do {
 			try migrationPlan.executeForStoreAtURL(sourceURL, type: sourceStoreType, destinationURL: destinationURL, storeType: destinationStoreType)
 		} catch let migrationPlanExecutionError as NSError {
@@ -94,38 +94,38 @@ public final class MigrationOperation: NSOperation {
 		}
 		progress.resignCurrent()
 		
-		state = .Finished
+		state = .finished
 	}
 	
 	class func keyPathsForValuesAffectingIsReady() -> Set<String> {
 		return ["state"]
 	}
 	
-	override public var ready: Bool {
-		return state == .Ready
+	override public var isReady: Bool {
+		return state == .ready
 	}
 	
 	class func keyPathsForValuesAffectingIsExecuting() -> Set<String> {
 		return ["state"]
 	}
 	
-	override public var executing: Bool {
-		return state == .Executing
+	override public var isExecuting: Bool {
+		return state == .executing
 	}
 	
 	class func keyPathsForValuesAffectingIsFinished() -> Set<String> {
 		return ["state"]
 	}
 	
-	override public var finished: Bool {
-		return state == .Finished
+	override public var isFinished: Bool {
+		return state == .finished
 	}
 	
 	class func keyPathsForValuesAffectingIsCancelled() -> Set<String> {
 		return ["state"]
 	}
 	
-	override public var cancelled: Bool {
-		return state == .Cancelled
+	override public var isCancelled: Bool {
+		return state == .cancelled
 	}
 }

@@ -143,7 +143,7 @@ public final class MigrationPlan: NSObject {
 		var latestStoreURL = sourceURL
 		var latestStoreType = sourceStoreType
 		for (stepIndex, step) in steps.enumerate() {
-			let stepDestinationURL = storeReplacementDirectory.URLByAppendingPathComponent("Migrated Store (Step \(stepIndex + 1) of \(stepCount))", isDirectory: false)
+			let stepDestinationURL = storeReplacementDirectory.URLByAppendingPathComponent("Migrated Store (Step \(stepIndex + 1) of \(stepCount))", isDirectory: false)!
 			var stepError: ErrorType?
 			do {
 				steppingProgress.becomeCurrentWithPendingUnitCount(1)

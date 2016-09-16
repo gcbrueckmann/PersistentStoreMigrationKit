@@ -170,7 +170,7 @@ public final class MigrationPlan: NSObject {
 }
 
 public extension MigrationPlan {
-	public enum Error: Error {
+	public enum Error: Swift.Error {
 		/// Model version hashes are missing from store metadata.
 		case missingStoreModelVersionHashes
 		/// Could not find the source model for a migration step.

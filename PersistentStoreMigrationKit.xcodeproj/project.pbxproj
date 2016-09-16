@@ -189,6 +189,7 @@
 				TargetAttributes = {
 					EDA89C281B8DEE7F00E9B761 = {
 						CreatedOnToolsVersion = 6.4;
+						LastSwiftMigration = 0800;
 					};
 					EDA89C331B8DEE7F00E9B761 = {
 						CreatedOnToolsVersion = 6.4;
@@ -367,6 +368,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 2.3;
 			};
 			name = Debug;
 		};
@@ -386,6 +388,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.bloo7.persistentstoremigrationkit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 2.3;
 			};
 			name = Release;
 		};

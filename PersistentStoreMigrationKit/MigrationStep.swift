@@ -19,7 +19,7 @@ final class MigrationStep: NSObject {
 	/// The model to migrate to.
 	let destinationModel: NSManagedObjectModel
 	
-	private var keyValueObservingContext = NSUUID().UUIDString
+	private var keyValueObservingContext = UUID().uuidString
 	
 	/// Initializes a migration step for a source model, destination model, and a mapping model.
 	/// 
@@ -33,7 +33,7 @@ final class MigrationStep: NSObject {
 		self.mappingModel = mappingModel
 	}
 	
-	private var progress: NSProgress?
+	private var progress: Progress?
 	
 	/// Performs the migration from the persistent store identified by `sourceURL` and using `sourceModel` to `destinationModel`, saving the result in the persistent store identified by `destinationURL`.
 	/// 
@@ -44,25 +44,25 @@ final class MigrationStep: NSObject {
 	///   - sourceStoreType: A string constant (such as `NSSQLiteStoreType`) that specifies the source store type.
 	///   - destinationURL: Identifies the persistent store to migrate to. May be identical to `sourceURL`.
 	///   - destinationStoreType: A string constant (such as `NSSQLiteStoreType`) that specifies the destination store type.
-	func executeForStoreAtURL(sourceURL: NSURL, type sourceStoreType: String, destinationURL: NSURL, storeType destinationStoreType: String) throws {
-		progress = NSProgress(totalUnitCount: 100)
+	func executeForStoreAtURL(_ sourceURL: URL, type sourceStoreType: String, destinationURL: URL, storeType destinationStoreType: String) throws {
+		progress = Progress(totalUnitCount: 100)
 		defer { progress = nil }
 		let migrationManager = NSMigrationManager(sourceModel: sourceModel, destinationModel: destinationModel)
-		migrationManager.addObserver(self, forKeyPath: "migrationProgress", options: .New, context: &keyValueObservingContext)
+		migrationManager.addObserver(self, forKeyPath: "migrationProgress", options: .new, context: &keyValueObservingContext)
 		defer { migrationManager.removeObserver(self, forKeyPath: "migrationProgress", context: &keyValueObservingContext) }
-		try migrationManager.migrateStoreFromURL(sourceURL, type: sourceStoreType, options: nil, withMappingModel: mappingModel, toDestinationURL: destinationURL, destinationType: destinationStoreType, destinationOptions: nil)
+		try migrationManager.migrateStore(from: sourceURL, sourceType: sourceStoreType, options: nil, with: mappingModel, toDestinationURL: destinationURL, destinationType: destinationStoreType, destinationOptions: nil)
 	}
 	
 	// MARK: NSKeyValueObserving
-	override func observeValueForKeyPath(keyPath: String!, ofObject object: AnyObject!, change: [String : AnyObject]!, context: UnsafeMutablePointer<Void>) {
+	override func observeValue(forKeyPath keyPath: String!, of object: Any!, change: [NSKeyValueChangeKey : Any]!, context: UnsafeMutableRawPointer?) {
 		if context != &keyValueObservingContext {
-			super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
+			super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
 			return
 		}
 		if let _ = object as? NSMigrationManager {
 			switch keyPath {
 			case "migrationProgress":
-				let newMigrationProgress = (change[NSKeyValueChangeNewKey] as! NSNumber).floatValue
+				let newMigrationProgress = (change[NSKeyValueChangeKey.newKey] as! NSNumber).floatValue
 				progress?.completedUnitCount = Int64(newMigrationProgress * 100)
 			default:
 				break

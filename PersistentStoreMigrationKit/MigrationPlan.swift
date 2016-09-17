@@ -54,14 +54,14 @@ public final class MigrationPlan: NSObject {
 	///   - storeMetadata: The metadata of an existing persistent store.
 	///   - destinationModel: The model to migrate to.
 	///   - bundles: A list of bundles to search for the source model and intermediate models.
-	public init(storeMetadata: [String: AnyObject], destinationModel: NSManagedObjectModel, bundles: [Bundle]) throws {
+	public init(storeMetadata: [String: Any], destinationModel: NSManagedObjectModel, bundles: [Bundle]) throws {
 		precondition(!bundles.isEmpty, "Bundles must be non-empty.")
 		let _ = Progress(totalUnitCount: -1)
 		if destinationModel.isConfiguration(withName: nil, compatibleWithStoreMetadata: storeMetadata) {
 			super.init()
 			return
 		}
-		guard let storeModelVersionHashes = storeMetadata[NSStoreModelVersionHashesKey] as? [String: AnyObject] else {
+		guard let storeModelVersionHashes = storeMetadata[NSStoreModelVersionHashesKey] as? [String: Any] else {
 			super.init()
 			throw Error.missingStoreModelVersionHashes
 		}

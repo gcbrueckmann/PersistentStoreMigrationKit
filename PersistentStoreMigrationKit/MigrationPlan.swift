@@ -115,25 +115,14 @@ public final class MigrationPlan: NSObject {
 	///   - destinationURL: Identifies the persistent store to migrate to. May be identical to `sourceURL`.
 	///   - destinationStoreType: A string constant (such as `NSSQLiteStoreType`) that specifies the destination store type.
 	public func executeForStoreAtURL(_ sourceURL: URL, type sourceStoreType: String, destinationURL: URL, storeType destinationStoreType: String) throws {
-		var error: NSError! = NSError(domain: "Migrator", code: 0, userInfo: nil)
-		if isEmpty {
-			return
-		}
+		guard !isEmpty else { return }
+
 		// 10% setup, 80% actual migration steps, 10% cleanup.
 		let overallProgress = Progress(totalUnitCount: 100)
 		
 		// Setup
-		var storeReplacementDirectoryError: NSError?
 		let storeReplacementDirectory: URL!
-		do {
-			storeReplacementDirectory = try FileManager.default.url(for: .itemReplacementDirectory, in: .userDomainMask, appropriateFor: destinationURL, create: true)
-		} catch let error as NSError {
-			storeReplacementDirectoryError = error
-			storeReplacementDirectory = nil
-		}
-		if storeReplacementDirectory == nil {
-			throw storeReplacementDirectoryError!
-		}
+        storeReplacementDirectory = try FileManager.default.url(for: .itemReplacementDirectory, in: .userDomainMask, appropriateFor: destinationURL, create: true)
 		overallProgress.completedUnitCount += 10
 		
 		// Execute migration steps.
@@ -160,9 +149,9 @@ public final class MigrationPlan: NSObject {
 		// Cleanup
 		do {
 			try FileManager.default.replaceItem(at: destinationURL, withItemAt: latestStoreURL, backupItemName: nil, options: [], resultingItemURL: nil)
-		} catch let storeReplacementError as NSError {
+		} catch {
 			let _ = try? FileManager.default.removeItem(at: storeReplacementDirectory)
-			throw storeReplacementError
+			throw error
 		}
 		let _ = try? FileManager.default.removeItem(at: storeReplacementDirectory)
 		overallProgress.completedUnitCount += 10

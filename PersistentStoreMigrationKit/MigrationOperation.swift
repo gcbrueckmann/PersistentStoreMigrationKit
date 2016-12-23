@@ -51,7 +51,7 @@ public final class MigrationOperation: Operation {
 	/// The current state of the migration operation.
 	fileprivate(set) public dynamic var state = State.ready
 	
-	fileprivate func cancelWithError(_ error: NSError) {
+	fileprivate func cancel(with error: Error) {
 		self.error = error
 		state = .cancelled
 	}
@@ -69,8 +69,8 @@ public final class MigrationOperation: Operation {
 		let existingStoreMetadata: [String: AnyObject]
 		do {
 			existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: sourceStoreType, at: sourceURL) as [String : AnyObject]
-		} catch let metadataError as NSError {
-			cancelWithError(metadataError)
+		} catch {
+            cancel(with: error)
 			return
 		}
 		
@@ -78,8 +78,8 @@ public final class MigrationOperation: Operation {
 		let migrationPlan: MigrationPlan
 		do {
 			migrationPlan = try MigrationPlan(storeMetadata: existingStoreMetadata, destinationModel: destinationModel, bundles: bundles)
-		} catch let migrationPlanError as NSError {
-			cancelWithError(migrationPlanError)
+		} catch {
+			cancel(with: error)
 			return
 		}
 		progress.completedUnitCount += 10
@@ -88,8 +88,8 @@ public final class MigrationOperation: Operation {
 		progress.becomeCurrent(withPendingUnitCount: 90)
 		do {
 			try migrationPlan.executeForStoreAtURL(sourceURL, type: sourceStoreType, destinationURL: destinationURL, storeType: destinationStoreType)
-		} catch let migrationPlanExecutionError as NSError {
-			cancelWithError(migrationPlanExecutionError)
+		} catch {
+			cancel(with: error)
 			return
 		}
 		progress.resignCurrent()

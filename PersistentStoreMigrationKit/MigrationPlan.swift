@@ -65,7 +65,6 @@ import CoreData
             return
         }
         guard let storeModelVersionHashes = storeMetadata[NSStoreModelVersionHashesKey] as? [String: Any] else {
-            super.init()
             throw Error.missingStoreModelVersionHashes
         }
         var latestModelVersionHashes = storeModelVersionHashes
@@ -78,7 +77,6 @@ import CoreData
                 }
             }
             if stepSourceModel == nil {
-                super.init()
                 throw Error.couldNotFindSourceModel
             }
             var stepDestinationModel: NSManagedObjectModel!
@@ -93,7 +91,6 @@ import CoreData
             if stepDestinationModel == nil ||
                 stepMappingModel == nil
             {
-                super.init()
                 throw Error.couldNotInferMappingSteps
             }
             latestModelVersionHashes = stepDestinationModel.entityVersionHashesByName as [String : AnyObject]
@@ -101,7 +98,6 @@ import CoreData
             steps.append(migrationStep)
         }
         if steps.isEmpty {
-            super.init()
             throw Error.couldNotInferMappingSteps
         }
         super.init()

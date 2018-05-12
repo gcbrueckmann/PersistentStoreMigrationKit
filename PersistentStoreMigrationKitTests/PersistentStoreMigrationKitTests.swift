@@ -20,15 +20,19 @@ class PersistentStoreMigrationKitTests: XCTestCase {
     override func setUp() {
         super.setUp()
         testBundle = Bundle(for: type(of: self))
-        
+
         for versionNumber in 1...3 {
-            let modelURL: URL! = testBundle.url(forResource: "TestModelV\(versionNumber)", withExtension: "mom")
-            XCTAssertNotNil(modelURL, "Could not locate V\(versionNumber) test model.")
-            let model: NSManagedObjectModel! = NSManagedObjectModel(contentsOf: modelURL)
-            XCTAssertNotNil(model, "Could not load V\(versionNumber) test model.")
+            guard let modelURL = testBundle.url(forResource: "TestModelV\(versionNumber)", withExtension: "mom") else {
+                XCTFail("Could not locate V\(versionNumber) test model.")
+                continue
+            }
+            guard let model = NSManagedObjectModel(contentsOf: modelURL) else {
+                XCTFail("Could not load V\(versionNumber) test model.")
+                continue
+            }
             models.append(model)
         }
-        
+
         // Create working directory.
         let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
         workingDirectoryURL = temporaryDirectoryURL.appendingPathComponent(ProcessInfo.processInfo.globallyUniqueString)
@@ -63,7 +67,7 @@ class PersistentStoreMigrationKitTests: XCTestCase {
             XCTFail("Could not initialize persistent store: \(error)")
             return
         }
-        
+
         for newerModel in models[models.indices.suffix(from: 1)] {
             let existingStoreMetadata: [String: AnyObject]
             do {
@@ -72,8 +76,10 @@ class PersistentStoreMigrationKitTests: XCTestCase {
                 XCTFail("Could not retrieve store metadata: \(error)")
                 return
             }
-            let existingStoreVersionHashes = existingStoreMetadata[NSStoreModelVersionHashesKey] as! [AnyHashable: Any]!
-            XCTAssertNotNil(existingStoreVersionHashes, "Could not retrieve version hashes from \(storeURL).")
+            guard let existingStoreVersionHashes = existingStoreMetadata[NSStoreModelVersionHashesKey] as? NSDictionary else {
+                XCTFail("Could not retrieve version hashes from \(storeURL).")
+                return
+            }
             var sourceModel: NSManagedObjectModel!
             for model in models {
                 if (model.entityVersionHashesByName as NSDictionary).isEqual(to: existingStoreVersionHashes) {
@@ -81,17 +87,22 @@ class PersistentStoreMigrationKitTests: XCTestCase {
                     break
                 }
             }
-            XCTAssertNotNil(sourceModel, "Could not determine source model for store migration.")
+            guard sourceModel != nil else {
+                XCTFail("Could not determine source model for store migration.")
+                return
+            }
             print("Source model entity version hashes:")
-            for (entityName, versionHash) in existingStoreVersionHashes! {
+            for (entityName, versionHash) in existingStoreVersionHashes {
                 print("\(entityName): \(versionHash)")
             }
             print("Target model entity version hashes:")
             for (entityName, versionHash) in newerModel.entityVersionHashesByName {
                 print("\(entityName): \(versionHash)")
             }
-            let mappingModel: NSMappingModel! = NSMappingModel(from: [testBundle], forSourceModel: sourceModel!, destinationModel: newerModel)
-            XCTAssertNotNil(mappingModel, "Could not find a model for mapping \(sourceModel) to \(newerModel).")
+            guard let mappingModel = NSMappingModel(from: [testBundle], forSourceModel: sourceModel!, destinationModel: newerModel) else {
+                XCTFail("Could not find a model for mapping \(sourceModel) to \(newerModel).")
+                return
+            }
             let migrationManager = NSMigrationManager(sourceModel: sourceModel, destinationModel: newerModel)
             let storeReplacementDirectoryURL: URL
             do {
@@ -130,7 +141,7 @@ class PersistentStoreMigrationKitTests: XCTestCase {
             XCTFail("Could not initialize persistent store: \(error)")
             return
         }
-        
+
         let latestModel = models.last!
         let existingStoreMetadata: [String: AnyObject]
         do {
@@ -139,8 +150,6 @@ class PersistentStoreMigrationKitTests: XCTestCase {
             XCTFail("Could not retrieve store metadata: \(error)")
             return
         }
-        let existingStoreVersionHashes = existingStoreMetadata[NSStoreModelVersionHashesKey] as! [String: AnyObject]!
-        XCTAssertNotNil(existingStoreVersionHashes, "Could not retrieve version hashes from \(storeURL).")
         let migrationPlan: MigrationPlan
         do {
             migrationPlan = try MigrationPlan(storeMetadata: existingStoreMetadata, destinationModel: latestModel, bundles: [testBundle])
@@ -173,18 +182,9 @@ class PersistentStoreMigrationKitTests: XCTestCase {
             XCTFail("Could not initialize persistent store: \(error)")
             return
         }
-        
+
         let latestModel = models.last!
-        let existingStoreMetadata: [String: AnyObject]
-        do {
-            existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: storeType, at: storeURL) as [String : AnyObject]
-        } catch {
-            XCTFail("Could not retrieve store metadata: \(error)")
-            return
-        }
-        let existingStoreVersionHashes = existingStoreMetadata[NSStoreModelVersionHashesKey] as! [String: AnyObject]!
-        XCTAssertNotNil(existingStoreVersionHashes, "Could not retrieve version hashes from \(storeURL).")
-        
+
         let operationExpectation = expectation(description: "Migration operation succeeded")
         let operationQueue = OperationQueue()
         operationQueue.name = "Core Data Migration Test"

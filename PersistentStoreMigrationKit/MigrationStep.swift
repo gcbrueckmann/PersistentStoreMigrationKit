@@ -19,8 +19,6 @@ final class MigrationStep: NSObject {
     /// The model to migrate to.
     let destinationModel: NSManagedObjectModel
     
-    private var keyValueObservingContext = UUID().uuidString
-    
     /// Initializes a migration step for a source model, destination model, and a mapping model.
     /// 
     /// - Parameters:
@@ -45,28 +43,17 @@ final class MigrationStep: NSObject {
     ///   - destinationURL: Identifies the persistent store to migrate to. May be identical to `sourceURL`.
     ///   - destinationStoreType: A string constant (such as `NSSQLiteStoreType`) that specifies the destination store type.
     func executeForStoreAtURL(_ sourceURL: URL, type sourceStoreType: String, destinationURL: URL, storeType destinationStoreType: String) throws {
-        progress = Progress(totalUnitCount: 100)
-        defer { progress = nil }
+        let progress = Progress(totalUnitCount: 100)
+        self.progress = progress
+        defer { self.progress = nil }
+
         let migrationManager = NSMigrationManager(sourceModel: sourceModel, destinationModel: destinationModel)
-        migrationManager.addObserver(self, forKeyPath: "migrationProgress", options: .new, context: &keyValueObservingContext)
-        defer { migrationManager.removeObserver(self, forKeyPath: "migrationProgress", context: &keyValueObservingContext) }
+        let migrationProgressObserver = migrationManager.observe(\.migrationProgress, options: .new) { (_, change) in
+            guard let migrationProgress = change.newValue else { preconditionFailure("Observed change should always have a value.") }
+            progress.completedUnitCount = Int64(migrationProgress * 100)
+        }
+        defer { migrationProgressObserver.invalidate() }
+
         try migrationManager.migrateStore(from: sourceURL, sourceType: sourceStoreType, options: nil, with: mappingModel, toDestinationURL: destinationURL, destinationType: destinationStoreType, destinationOptions: nil)
-    }
-    
-    // MARK: NSKeyValueObserving
-    override func observeValue(forKeyPath keyPath: String!, of object: Any!, change: [NSKeyValueChangeKey : Any]!, context: UnsafeMutableRawPointer?) {
-        if context != &keyValueObservingContext {
-            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
-            return
-        }
-        if let _ = object as? NSMigrationManager {
-            switch keyPath {
-            case "migrationProgress":
-                let newMigrationProgress = (change[NSKeyValueChangeKey.newKey] as! NSNumber).floatValue
-                progress?.completedUnitCount = Int64(newMigrationProgress * 100)
-            default:
-                break
-            }
-        }
     }
 }

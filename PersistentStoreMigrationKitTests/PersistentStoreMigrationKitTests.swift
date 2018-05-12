@@ -12,10 +12,10 @@ import XCTest
 @testable import PersistentStoreMigrationKit
 
 class PersistentStoreMigrationKitTests: XCTestCase {
-	fileprivate var models = [NSManagedObjectModel]()
-	fileprivate var workingDirectoryURL: URL!
-	fileprivate let storeType = NSSQLiteStoreType
-	fileprivate var testBundle: Bundle!
+    private var models: [NSManagedObjectModel] = []
+	private var workingDirectoryURL: URL!
+	private let storeType = NSSQLiteStoreType
+	private var testBundle: Bundle!
     
     override func setUp() {
         super.setUp()
@@ -50,7 +50,7 @@ class PersistentStoreMigrationKitTests: XCTestCase {
         super.tearDown()
     }
 	
-	fileprivate func initializeStoreAtURL(_ storeURL: URL) throws {
+	private func initializeStoreAtURL(_ storeURL: URL) throws {
 		let initialPersistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: models.first!)
 		try initialPersistentStoreCoordinator.addPersistentStore(ofType: storeType, configurationName: nil, at: storeURL, options: nil)
 	}

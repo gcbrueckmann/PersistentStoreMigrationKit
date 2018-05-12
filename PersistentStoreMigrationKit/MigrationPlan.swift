@@ -60,7 +60,8 @@ import CoreData
     @objc public init(storeMetadata: [String: Any], destinationModel: NSManagedObjectModel, bundles: [Bundle]) throws {
         precondition(!bundles.isEmpty, "Bundles must be non-empty.")
         let _ = Progress(totalUnitCount: -1)
-        if destinationModel.isConfiguration(withName: nil, compatibleWithStoreMetadata: storeMetadata) {
+        guard !destinationModel.isConfiguration(withName: nil, compatibleWithStoreMetadata: storeMetadata) else {
+            // No work to be done.
             super.init()
             return
         }

@@ -27,7 +27,7 @@ import CoreData
     /// The overall progress of the migration operation.
     @objc public let progress: Progress
     /// Any error that may have occured during the execution of the migration operation.
-    @objc public private(set) var error: Error?
+    @objc public private(set) var error: Swift.Error?
 
     /// Initializes a migration operation.
     ///
@@ -51,7 +51,7 @@ import CoreData
     /// The current state of the migration operation.
     @objc private(set) public dynamic var state = State.ready
 
-    private func cancel(with error: Error) {
+    private func cancel(with error: Swift.Error) {
         self.error = error
         state = .cancelled
     }

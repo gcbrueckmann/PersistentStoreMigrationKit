@@ -133,7 +133,7 @@ import CoreData
         var latestStoreType = sourceStoreType
         for (stepIndex, step) in steps.enumerated() {
             let stepDestinationURL = storeReplacementDirectory.appendingPathComponent("Migrated Store (Step \(stepIndex + 1) of \(stepCount))", isDirectory: false)
-            var stepError: Error?
+            var stepError: Swift.Error?
             do {
                 steppingProgress.becomeCurrent(withPendingUnitCount: 1)
                 defer { steppingProgress.resignCurrent() }
@@ -155,16 +155,5 @@ import CoreData
         }
         let _ = try? FileManager.default.removeItem(at: storeReplacementDirectory)
         overallProgress.completedUnitCount += 10
-    }
-}
-
-public extension MigrationPlan {
-    public enum Error: Swift.Error {
-        /// Model version hashes are missing from store metadata.
-        case missingStoreModelVersionHashes
-        /// Could not find the source model for a migration step.
-        case couldNotFindSourceModel
-        /// Could not find a destination and mapping model for a migration step.
-        case couldNotInferMappingSteps
     }
 }

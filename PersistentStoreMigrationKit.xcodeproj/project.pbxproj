@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5B9AF29020A756C60065D972 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B9AF28F20A756C60065D972 /* Error.swift */; };
 		ED27A2C51B8F45D9005FAFCB /* ModelV2ToModelV3.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = EDA89C511B8DF11400E9B761 /* ModelV2ToModelV3.xcmappingmodel */; };
 		ED27A2C61B8F46B9005FAFCB /* ModelV1ToModelV2.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = EDA89C4E1B8DF0B500E9B761 /* ModelV1ToModelV2.xcmappingmodel */; };
 		ED27A2C71B8F46BC005FAFCB /* TestModelV2.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = EDA89C571B8DF15B00E9B761 /* TestModelV2.xcdatamodel */; };
@@ -31,6 +32,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5B9AF28F20A756C60065D972 /* Error.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Error.swift; sourceTree = "<group>"; };
 		ED69308E1B8E306700F9493D /* MigrationPlan.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MigrationPlan.swift; sourceTree = "<group>"; };
 		ED6930921B8E4E0300F9493D /* MigrationStep.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MigrationStep.swift; sourceTree = "<group>"; };
 		EDA89C291B8DEE7F00E9B761 /* PersistentStoreMigrationKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PersistentStoreMigrationKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -91,6 +93,7 @@
 				EDA89C451B8DEEA800E9B761 /* MigrationOperation.swift */,
 				ED69308E1B8E306700F9493D /* MigrationPlan.swift */,
 				ED6930921B8E4E0300F9493D /* MigrationStep.swift */,
+				5B9AF28F20A756C60065D972 /* Error.swift */,
 				EDA89C2C1B8DEE7F00E9B761 /* Supporting Files */,
 			);
 			path = PersistentStoreMigrationKit;
@@ -237,6 +240,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5B9AF29020A756C60065D972 /* Error.swift in Sources */,
 				ED6930931B8E4E0300F9493D /* MigrationStep.swift in Sources */,
 				EDA89C461B8DEEA800E9B761 /* MigrationOperation.swift in Sources */,
 				ED69308F1B8E306700F9493D /* MigrationPlan.swift in Sources */,

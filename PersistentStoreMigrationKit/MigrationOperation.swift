@@ -87,7 +87,7 @@ import CoreData
         // Execute migration plan.
         progress.becomeCurrent(withPendingUnitCount: 90)
         do {
-            try migrationPlan.executeForStoreAtURL(sourceURL, type: sourceStoreType, destinationURL: destinationURL, storeType: destinationStoreType)
+            try migrationPlan.executeForStore(at: sourceURL, type: sourceStoreType, destinationURL: destinationURL, storeType: destinationStoreType)
         } catch {
             cancel(with: error)
             return

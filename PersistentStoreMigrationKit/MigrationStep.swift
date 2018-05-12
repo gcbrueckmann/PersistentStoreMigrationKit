@@ -42,7 +42,7 @@ final class MigrationStep: NSObject {
     ///   - sourceStoreType: A string constant (such as `NSSQLiteStoreType`) that specifies the source store type.
     ///   - destinationURL: Identifies the persistent store to migrate to. May be identical to `sourceURL`.
     ///   - destinationStoreType: A string constant (such as `NSSQLiteStoreType`) that specifies the destination store type.
-    func executeForStoreAtURL(_ sourceURL: URL, type sourceStoreType: String, destinationURL: URL, storeType destinationStoreType: String) throws {
+    func executeForStore(at sourceURL: URL, type sourceStoreType: String, destinationURL: URL, storeType destinationStoreType: String) throws {
         let progress = Progress(totalUnitCount: 100)
         self.progress = progress
         defer { self.progress = nil }

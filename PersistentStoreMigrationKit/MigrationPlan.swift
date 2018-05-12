@@ -54,7 +54,7 @@ import CoreData
     ///   - sourceStoreType: A string constant (such as `NSSQLiteStoreType`) that specifies the source store type.
     ///   - destinationURL: Identifies the persistent store to migrate to. May be identical to `sourceURL`.
     ///   - destinationStoreType: A string constant (such as `NSSQLiteStoreType`) that specifies the destination store type.
-    @objc public func executeForStoreAtURL(_ sourceURL: URL, type sourceStoreType: String, destinationURL: URL, storeType destinationStoreType: String) throws {
+    @objc public func executeForStore(at sourceURL: URL, type sourceStoreType: String, destinationURL: URL, storeType destinationStoreType: String) throws {
         guard !isEmpty else { return }
 
         // 10% setup, 80% actual migration steps, 10% cleanup.
@@ -77,7 +77,7 @@ import CoreData
             do {
                 steppingProgress.becomeCurrent(withPendingUnitCount: 1)
                 defer { steppingProgress.resignCurrent() }
-                try step.executeForStoreAtURL(latestStoreURL, type: latestStoreType, destinationURL: stepDestinationURL, storeType: destinationStoreType)
+                try step.executeForStore(at: latestStoreURL, type: latestStoreType, destinationURL: stepDestinationURL, storeType: destinationStoreType)
             } catch {
                 let _ = try? FileManager.default.removeItem(at: storeReplacementDirectory)
                 throw error

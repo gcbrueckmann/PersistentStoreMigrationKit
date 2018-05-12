@@ -160,7 +160,7 @@ class PersistentStoreMigrationKitTests: XCTestCase {
         let expectedMigrationPlanStepCount = models.count - 1
         XCTAssertEqual(migrationPlan.numberOfSteps, expectedMigrationPlanStepCount, "Migration plan step count should be \(expectedMigrationPlanStepCount), but is \(migrationPlan.numberOfSteps).")
         do {
-            try migrationPlan.executeForStoreAtURL(storeURL, type: storeType, destinationURL: storeURL, storeType: storeType)
+            try migrationPlan.executeForStore(at: storeURL, type: storeType, destinationURL: storeURL, storeType: storeType)
         } catch {
             XCTFail("Could not execute migration plan for \(storeURL): \(error)")
             return

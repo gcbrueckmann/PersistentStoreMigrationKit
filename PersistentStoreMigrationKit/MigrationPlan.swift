@@ -10,12 +10,12 @@ import Foundation
 import CoreData
 
 /// A `MigrationPlan` instance encapsulates the progressive migration from one `NSManagedObjectModel` to another with an arbitrary number of intermediate models.
-public final class MigrationPlan: NSObject {
+@objc public final class MigrationPlan: NSObject {
 	private var steps = [MigrationStep]()
 	/// The number of steps in the plan. Zero, if the plan is empty.
-	public var stepCount: Int { return steps.count }
+	@objc public var stepCount: Int { return steps.count }
 	/// Indicates whether executing the plan will do nothing.
-	public var isEmpty: Bool { return stepCount == 0 }
+	@objc public var isEmpty: Bool { return stepCount == 0 }
 	
 	private static func modelsInBundles(_ bundles: [Bundle]) -> [NSManagedObjectModel] {
 		var models = [NSManagedObjectModel]()
@@ -54,7 +54,7 @@ public final class MigrationPlan: NSObject {
 	///   - storeMetadata: The metadata of an existing persistent store.
 	///   - destinationModel: The model to migrate to.
 	///   - bundles: A list of bundles to search for the source model and intermediate models.
-	public init(storeMetadata: [String: Any], destinationModel: NSManagedObjectModel, bundles: [Bundle]) throws {
+	@objc public init(storeMetadata: [String: Any], destinationModel: NSManagedObjectModel, bundles: [Bundle]) throws {
 		precondition(!bundles.isEmpty, "Bundles must be non-empty.")
 		let _ = Progress(totalUnitCount: -1)
 		if destinationModel.isConfiguration(withName: nil, compatibleWithStoreMetadata: storeMetadata) {
@@ -114,7 +114,7 @@ public final class MigrationPlan: NSObject {
 	///   - sourceStoreType: A string constant (such as `NSSQLiteStoreType`) that specifies the source store type.
 	///   - destinationURL: Identifies the persistent store to migrate to. May be identical to `sourceURL`.
 	///   - destinationStoreType: A string constant (such as `NSSQLiteStoreType`) that specifies the destination store type.
-	public func executeForStoreAtURL(_ sourceURL: URL, type sourceStoreType: String, destinationURL: URL, storeType destinationStoreType: String) throws {
+	@objc public func executeForStoreAtURL(_ sourceURL: URL, type sourceStoreType: String, destinationURL: URL, storeType destinationStoreType: String) throws {
 		guard !isEmpty else { return }
 
 		// 10% setup, 80% actual migration steps, 10% cleanup.

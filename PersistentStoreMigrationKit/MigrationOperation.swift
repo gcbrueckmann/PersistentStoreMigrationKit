@@ -11,23 +11,23 @@ import CoreData
 
 /// A `MigrationOperation` instance encapsulates the progressive migration from one `NSManagedObjectModel` to another with an arbitrary number of intermediate models.
 /// This is a companion to and implemented on top of the `MigrationPlan` class.
-public final class MigrationOperation: Operation {
+@objc public final class MigrationOperation: Operation {
 	/// Identifies the persistent store to migrate from.
-	public var sourceURL: URL!
+	@objc public var sourceURL: URL!
 	/// A string constant (such as `NSSQLiteStoreType`) that specifies the source store type.
-	public var sourceStoreType: String!
+	@objc public var sourceStoreType: String!
 	/// Identifies the persistent store to migrate to. May be identical to `sourceURL`.
-	public var destinationURL: URL!
+	@objc public var destinationURL: URL!
 	/// A string constant (such as `NSSQLiteStoreType`) that specifies the destination store type.
-	public var destinationStoreType: String!
+	@objc public var destinationStoreType: String!
 	/// The model to migrate to.
-	public var destinationModel: NSManagedObjectModel!
+	@objc public var destinationModel: NSManagedObjectModel!
 	/// A list of bundles to search for the source model and intermediate models.
-	public var bundles: [Bundle]!
+	@objc public var bundles: [Bundle]!
 	/// The overall progress of the migration operation.
-	public let progress: Progress
+	@objc public let progress: Progress
 	/// Any error that may have occured during the execution of the migration operation.
-	public private(set) var error: Error?
+	@objc public private(set) var error: Error?
 	
 	/// Initializes a migration operation.
 	/// 
@@ -97,7 +97,7 @@ public final class MigrationOperation: Operation {
 		state = .finished
 	}
 	
-	class func keyPathsForValuesAffectingIsReady() -> Set<String> {
+	@objc class func keyPathsForValuesAffectingIsReady() -> Set<String> {
 		return ["state"]
 	}
 	
@@ -105,7 +105,7 @@ public final class MigrationOperation: Operation {
 		return state == .ready
 	}
 	
-	class func keyPathsForValuesAffectingIsExecuting() -> Set<String> {
+	@objc class func keyPathsForValuesAffectingIsExecuting() -> Set<String> {
 		return ["state"]
 	}
 	
@@ -113,7 +113,7 @@ public final class MigrationOperation: Operation {
 		return state == .executing
 	}
 	
-	class func keyPathsForValuesAffectingIsFinished() -> Set<String> {
+	@objc class func keyPathsForValuesAffectingIsFinished() -> Set<String> {
 		return ["state"]
 	}
 	
@@ -121,7 +121,7 @@ public final class MigrationOperation: Operation {
 		return state == .finished
 	}
 	
-	class func keyPathsForValuesAffectingIsCancelled() -> Set<String> {
+	@objc class func keyPathsForValuesAffectingIsCancelled() -> Set<String> {
 		return ["state"]
 	}
 	

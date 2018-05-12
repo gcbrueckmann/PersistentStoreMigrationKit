@@ -12,28 +12,28 @@ import XCTest
 @testable import PersistentStoreMigrationKit
 
 class PersistentStoreMigrationKitTests: XCTestCase {
-	private var models = [NSManagedObjectModel]()
-	private var workingDirectoryURL: NSURL!
+    private var models: [NSManagedObjectModel] = []
+	private var workingDirectoryURL: URL!
 	private let storeType = NSSQLiteStoreType
-	private var testBundle: NSBundle!
+	private var testBundle: Bundle!
     
     override func setUp() {
         super.setUp()
-		testBundle = NSBundle(forClass: self.dynamicType)
+		testBundle = Bundle(for: type(of: self))
 		
 		for versionNumber in 1...3 {
-			let modelURL: NSURL! = testBundle.URLForResource("TestModelV\(versionNumber)", withExtension: "mom")
+			let modelURL: URL! = testBundle.url(forResource: "TestModelV\(versionNumber)", withExtension: "mom")
 			XCTAssertNotNil(modelURL, "Could not locate V\(versionNumber) test model.")
-			let model: NSManagedObjectModel! = NSManagedObjectModel(contentsOfURL: modelURL)
+			let model: NSManagedObjectModel! = NSManagedObjectModel(contentsOf: modelURL)
 			XCTAssertNotNil(model, "Could not load V\(versionNumber) test model.")
 			models.append(model)
 		}
 		
 		// Create working directory.
-		let temporaryDirectoryURL = NSURL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-		workingDirectoryURL = temporaryDirectoryURL.URLByAppendingPathComponent(NSProcessInfo.processInfo().globallyUniqueString)
+		let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+		workingDirectoryURL = temporaryDirectoryURL.appendingPathComponent(ProcessInfo.processInfo.globallyUniqueString)
 		do {
-			try NSFileManager.defaultManager().createDirectoryAtURL(workingDirectoryURL, withIntermediateDirectories: true, attributes: nil)
+			try FileManager.default.createDirectory(at: workingDirectoryURL, withIntermediateDirectories: true, attributes: nil)
 		} catch {
 			XCTFail("Could not create working directory: \(error)")
 		}
@@ -42,7 +42,7 @@ class PersistentStoreMigrationKitTests: XCTestCase {
     override func tearDown() {
 		if let workingDirectoryURL = workingDirectoryURL {
 			do {
-				try NSFileManager.defaultManager().removeItemAtURL(workingDirectoryURL)
+				try FileManager.default.removeItem(at: workingDirectoryURL)
 			} catch {
 				XCTFail("Could not remove working directory: \(error)")
 			}
@@ -50,13 +50,13 @@ class PersistentStoreMigrationKitTests: XCTestCase {
         super.tearDown()
     }
 	
-	private func initializeStoreAtURL(storeURL: NSURL) throws {
+	private func initializeStoreAtURL(_ storeURL: URL) throws {
 		let initialPersistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: models.first!)
-		try initialPersistentStoreCoordinator.addPersistentStoreWithType(storeType, configuration: nil, URL: storeURL, options: nil)
+		try initialPersistentStoreCoordinator.addPersistentStore(ofType: storeType, configurationName: nil, at: storeURL, options: nil)
 	}
     
     func testManualStoreMigration() {
-		let storeURL = workingDirectoryURL.URLByAppendingPathComponent("Manually Migrated Store", isDirectory: false)
+		let storeURL = workingDirectoryURL.appendingPathComponent("Manually Migrated Store", isDirectory: false)
 		do {
 			try initializeStoreAtURL(storeURL)
 		} catch {
@@ -64,58 +64,57 @@ class PersistentStoreMigrationKitTests: XCTestCase {
 			return
 		}
 		
-		for newerModel in models[1..<models.endIndex] {
+		for newerModel in models[models.indices.suffix(from: 1)] {
 			let existingStoreMetadata: [String: AnyObject]
 			do {
-				existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStoreOfType(storeType, URL: storeURL)
+				existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: storeType, at: storeURL) as [String : AnyObject]
 			} catch {
 				XCTFail("Could not retrieve store metadata: \(error)")
 				return
 			}
-			let existingStoreVersionHashes = existingStoreMetadata[NSStoreModelVersionHashesKey] as! [NSObject: AnyObject]!
+			let existingStoreVersionHashes = existingStoreMetadata[NSStoreModelVersionHashesKey] as! [AnyHashable: Any]!
 			XCTAssertNotNil(existingStoreVersionHashes, "Could not retrieve version hashes from \(storeURL).")
 			var sourceModel: NSManagedObjectModel!
 			for model in models {
-				if (model.entityVersionHashesByName as NSDictionary).isEqualToDictionary(existingStoreVersionHashes) {
+				if (model.entityVersionHashesByName as NSDictionary).isEqual(to: existingStoreVersionHashes) {
 					sourceModel = model
 					break
 				}
 			}
 			XCTAssertNotNil(sourceModel, "Could not determine source model for store migration.")
 			print("Source model entity version hashes:")
-			for (entityName, versionHash) in existingStoreVersionHashes {
+			for (entityName, versionHash) in existingStoreVersionHashes! {
 				print("\(entityName): \(versionHash)")
 			}
 			print("Target model entity version hashes:")
 			for (entityName, versionHash) in newerModel.entityVersionHashesByName {
 				print("\(entityName): \(versionHash)")
 			}
-			let mappingModel: NSMappingModel! = NSMappingModel(fromBundles: [testBundle], forSourceModel: sourceModel!, destinationModel: newerModel)
+			let mappingModel: NSMappingModel! = NSMappingModel(from: [testBundle], forSourceModel: sourceModel!, destinationModel: newerModel)
 			XCTAssertNotNil(mappingModel, "Could not find a model for mapping \(sourceModel) to \(newerModel).")
 			let migrationManager = NSMigrationManager(sourceModel: sourceModel, destinationModel: newerModel)
-			let storeReplacementDirectoryURL: NSURL
+			let storeReplacementDirectoryURL: URL
 			do {
-				storeReplacementDirectoryURL = try NSFileManager.defaultManager().URLForDirectory(.ItemReplacementDirectory, inDomain: .UserDomainMask, appropriateForURL: storeURL, create: true)
+				storeReplacementDirectoryURL = try FileManager.default.url(for: .itemReplacementDirectory, in: .userDomainMask, appropriateFor: storeURL, create: true)
 			} catch {
 				XCTFail("Could not create item replacement directory for migrating store: \(error)")
 				return
 			}
-			let temporaryStoreURL = storeReplacementDirectoryURL.URLByAppendingPathComponent(storeURL.lastPathComponent!, isDirectory: false)
+			let temporaryStoreURL = storeReplacementDirectoryURL.appendingPathComponent(storeURL.lastPathComponent, isDirectory: false)
 			do {
-				try migrationManager.migrateStoreFromURL(storeURL, type: storeType, options: nil, withMappingModel: mappingModel, toDestinationURL: temporaryStoreURL, destinationType: storeType, destinationOptions: nil)
+				try migrationManager.migrateStore(from: storeURL, sourceType: storeType, options: nil, with: mappingModel, toDestinationURL: temporaryStoreURL, destinationType: storeType, destinationOptions: nil)
 			} catch {
 				XCTFail("Could not migrate \(storeURL) from \(sourceModel) to \(newerModel): \(error)")
 				return
 			}
-			var newStoreURL: NSURL?
 			do {
-				try NSFileManager.defaultManager().replaceItemAtURL(storeURL, withItemAtURL: temporaryStoreURL, backupItemName: nil, options: [], resultingItemURL: &newStoreURL)
+                try FileManager.default.replaceItem(at: storeURL, withItemAt: temporaryStoreURL, backupItemName: nil, options: [], resultingItemURL: nil)
 			} catch {
 				XCTFail("Could not replace \(storeURL) with migrated store \(temporaryStoreURL): \(error)")
 				return
 			}
 			do {
-				try NSFileManager.defaultManager().removeItemAtURL(storeReplacementDirectoryURL)
+				try FileManager.default.removeItem(at: storeReplacementDirectoryURL)
 			} catch {
 				XCTFail("Could not remove item replacmeent directory after migrating store: \(error)")
 				return
@@ -124,7 +123,7 @@ class PersistentStoreMigrationKitTests: XCTestCase {
     }
 	
 	func testAutomaticMigration() {
-		let storeURL = workingDirectoryURL.URLByAppendingPathComponent("Automatically Migrated Store", isDirectory: false)
+		let storeURL = workingDirectoryURL.appendingPathComponent("Automatically Migrated Store", isDirectory: false)
 		do {
 			try initializeStoreAtURL(storeURL)
 		} catch {
@@ -135,7 +134,7 @@ class PersistentStoreMigrationKitTests: XCTestCase {
 		let latestModel = models.last!
 		let existingStoreMetadata: [String: AnyObject]
 		do {
-			existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStoreOfType(storeType, URL: storeURL)
+			existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: storeType, at: storeURL) as [String : AnyObject]
 		} catch {
 			XCTFail("Could not retrieve store metadata: \(error)")
 			return
@@ -159,7 +158,7 @@ class PersistentStoreMigrationKitTests: XCTestCase {
 		}
 		let persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: latestModel)
 		do {
-			let _ = try persistentStoreCoordinator.addPersistentStoreWithType(storeType, configuration: nil, URL: storeURL, options: nil)
+			let _ = try persistentStoreCoordinator.addPersistentStore(ofType: storeType, configurationName: nil, at: storeURL, options: nil)
 		} catch {
 			XCTFail("Could not load persistent store after migration: \(error)")
 			return
@@ -167,7 +166,7 @@ class PersistentStoreMigrationKitTests: XCTestCase {
 	}
 	
 	func testMigrationOperation() {
-		let storeURL = workingDirectoryURL.URLByAppendingPathComponent("Automatically Migrated Store", isDirectory: false)
+		let storeURL = workingDirectoryURL.appendingPathComponent("Automatically Migrated Store", isDirectory: false)
 		do {
 			try initializeStoreAtURL(storeURL)
 		} catch {
@@ -178,7 +177,7 @@ class PersistentStoreMigrationKitTests: XCTestCase {
 		let latestModel = models.last!
 		let existingStoreMetadata: [String: AnyObject]
 		do {
-			existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStoreOfType(storeType, URL: storeURL)
+			existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: storeType, at: storeURL) as [String : AnyObject]
 		} catch {
 			XCTFail("Could not retrieve store metadata: \(error)")
 			return
@@ -186,8 +185,8 @@ class PersistentStoreMigrationKitTests: XCTestCase {
 		let existingStoreVersionHashes = existingStoreMetadata[NSStoreModelVersionHashesKey] as! [String: AnyObject]!
 		XCTAssertNotNil(existingStoreVersionHashes, "Could not retrieve version hashes from \(storeURL).")
 		
-		let operationExpectation = expectationWithDescription("Migration operation succeeded")
-		let operationQueue = NSOperationQueue()
+		let operationExpectation = expectation(description: "Migration operation succeeded")
+		let operationQueue = OperationQueue()
 		operationQueue.name = "Core Data Migration Test"
 		let migrationOperation = MigrationOperation()
 		migrationOperation.sourceURL = storeURL
@@ -197,17 +196,17 @@ class PersistentStoreMigrationKitTests: XCTestCase {
 		migrationOperation.destinationModel = latestModel
 		migrationOperation.bundles = [testBundle]
 		migrationOperation.completionBlock = {
-			XCTAssertNil(migrationOperation.error, "Migration operation failed: \(migrationOperation.error)")
+			XCTAssertNil(migrationOperation.error, "Migration operation failed: \(migrationOperation.error!)")
 			operationExpectation.fulfill()
 		}
 		operationQueue.addOperation(migrationOperation)
-		waitForExpectationsWithTimeout(10) { error in
+		waitForExpectations(timeout: 10) { error in
 			if error != nil {
 				return
 			}
 			let persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: latestModel)
 			do {
-				try persistentStoreCoordinator.addPersistentStoreWithType(self.storeType, configuration: nil, URL: storeURL, options: nil)
+				try persistentStoreCoordinator.addPersistentStore(ofType: self.storeType, configurationName: nil, at: storeURL, options: nil)
 			} catch {
 				XCTFail("Could not load persistent store after migration: \(error)")
 				return
@@ -216,11 +215,11 @@ class PersistentStoreMigrationKitTests: XCTestCase {
 	}
 	
 	func testMigrationFailure() {
-		let storeURL = workingDirectoryURL.URLByAppendingPathComponent("Store That Does Not Exist", isDirectory: false)
+		let storeURL = workingDirectoryURL.appendingPathComponent("Store That Does Not Exist", isDirectory: false)
 		let latestModel = models.last!
 		let existingStoreMetadata: [String: AnyObject]
 		do {
-			existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStoreOfType(storeType, URL: storeURL)
+			existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: storeType, at: storeURL) as [String : AnyObject]
 			XCTFail("Retrieving store metadata for nonexistant store succeeded: \(existingStoreMetadata)")
 		} catch {
 			existingStoreMetadata = [:]

@@ -49,9 +49,9 @@ public final class MigrationOperation: Operation {
 		case cancelled
 	}
 	/// The current state of the migration operation.
-	fileprivate(set) public dynamic var state = State.ready
+	private(set) public dynamic var state = State.ready
 	
-	fileprivate func cancel(with error: Error) {
+	private func cancel(with error: Error) {
 		self.error = error
 		state = .cancelled
 	}

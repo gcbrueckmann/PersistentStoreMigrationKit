@@ -16,32 +16,35 @@ import CoreData
     @objc public var stepCount: Int { return steps.count }
     /// Indicates whether executing the plan will do nothing.
     @objc public var isEmpty: Bool { return stepCount == 0 }
-    
-    private static func modelsInBundles(_ bundles: [Bundle]) -> [NSManagedObjectModel] {
-        var models = [NSManagedObjectModel]()
-        for bundle in bundles {
-            if let modelURLs = bundle.urls(forResourcesWithExtension: "mom", subdirectory: nil) {
-                for modelURL in modelURLs {
-                    if let model = NSManagedObjectModel(contentsOf: modelURL) {
-                        models.append(model)
-                    }
+
+    /// Aggregates all valid models in the given bundles.
+    ///
+    /// - Attention: Invalid model files will trigger assertion failures.
+    private static func models(in bundles: [Bundle]) -> [NSManagedObjectModel] {
+        var modelURLs: [URL] = []
+        // Collect simple Core Data model URLs
+        modelURLs += bundles.flatMap { (bundle) in
+            return bundle.urls(forResourcesWithExtension: "mom", subdirectory: nil) ?? []
+        }
+        // Collect versioned Core Data model URLs
+        modelURLs += bundles.flatMap { (bundle) -> [URL] in
+            guard let modelBundleURLs = bundle.urls(forResourcesWithExtension: "momd", subdirectory: nil) else { return [] }
+            return modelBundleURLs.flatMap { (modelBundleURL) -> [URL] in
+                guard let modelBundle = Bundle(url: modelBundleURL) else {
+                    assertionFailure("\(modelBundleURL) is not a valid versioned Core Data model (bundle).")
+                    return []
                 }
-            }
-            if let modelURLs = bundle.urls(forResourcesWithExtension: "momd", subdirectory: nil) {
-                for modelBundleURL in modelURLs {
-                    if let modelBundle = Bundle(url: modelBundleURL),
-                        let modelURLs = modelBundle.urls(forResourcesWithExtension: "mom", subdirectory: nil)
-                    {
-                        for modelURL in modelURLs {
-                            if let model = NSManagedObjectModel(contentsOf: modelURL) {
-                                models.append(model)
-                            }
-                        }
-                    }
-                }
+                return modelBundle.urls(forResourcesWithExtension: "mom", subdirectory: nil) ?? []
             }
         }
-        return models
+        // Load models at all the above URLs
+        return modelURLs.compactMap { (modelURL) in
+            guard let model = NSManagedObjectModel(contentsOf: modelURL) else {
+                assertionFailure("\(modelURL) is not a valid Core Data model.")
+                return nil
+            }
+            return model
+        }
     }
     
     /// Devises a migration plan based on the metadata of an existing store, a destination managed object model and a list of bundles to search for intermediate models.
@@ -66,7 +69,7 @@ import CoreData
             throw Error.missingStoreModelVersionHashes
         }
         var latestModelVersionHashes = storeModelVersionHashes
-        let models = type(of: self).modelsInBundles(bundles)
+        let models = MigrationPlan.models(in: bundles)
         while !(latestModelVersionHashes as NSDictionary).isEqual(to: destinationModel.entityVersionHashesByName) {
             var stepSourceModel: NSManagedObjectModel!
             for model in models {

@@ -13,9 +13,9 @@ import CoreData
 @objc public final class MigrationPlan: NSObject {
     private let steps: [MigrationStep]
     /// The number of steps in the plan. Zero, if the plan is empty.
-    @objc public var stepCount: Int { return steps.count }
+    @objc public var numberOfSteps: Int { return steps.count }
     /// Indicates whether executing the plan will do nothing.
-    @objc public var isEmpty: Bool { return stepCount == 0 }
+    @objc public var isEmpty: Bool { return numberOfSteps == 0 }
     
     /// Devises a migration plan based on the metadata of an existing store, a destination managed object model and a list of bundles to search for intermediate models.
     /// 
@@ -72,7 +72,7 @@ import CoreData
         var latestStoreURL = sourceURL
         var latestStoreType = sourceStoreType
         for (stepIndex, step) in steps.enumerated() {
-            let stepDestinationURL = storeReplacementDirectory.appendingPathComponent("Migrated Store (Step \(stepIndex + 1) of \(stepCount))", isDirectory: false)
+            let stepDestinationURL = storeReplacementDirectory.appendingPathComponent("Migrated Store (Step \(stepIndex + 1) of \(numberOfSteps))", isDirectory: false)
             var stepError: Swift.Error?
             do {
                 steppingProgress.becomeCurrent(withPendingUnitCount: 1)

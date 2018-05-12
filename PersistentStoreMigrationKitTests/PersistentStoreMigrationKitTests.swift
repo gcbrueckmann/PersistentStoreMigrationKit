@@ -107,9 +107,8 @@ class PersistentStoreMigrationKitTests: XCTestCase {
 				XCTFail("Could not migrate \(storeURL) from \(sourceModel) to \(newerModel): \(error)")
 				return
 			}
-			var newStoreURL: URL?
 			do {
-				try FileManager.default.replaceItem(at: storeURL, withItemAt: temporaryStoreURL, backupItemName: nil, options: [], resultingItemURL: newStoreURL as! NSURL)
+                try FileManager.default.replaceItem(at: storeURL, withItemAt: temporaryStoreURL, backupItemName: nil, options: [], resultingItemURL: nil)
 			} catch {
 				XCTFail("Could not replace \(storeURL) with migrated store \(temporaryStoreURL): \(error)")
 				return

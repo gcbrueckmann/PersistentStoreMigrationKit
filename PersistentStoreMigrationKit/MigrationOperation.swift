@@ -49,7 +49,7 @@ public final class MigrationOperation: Operation {
 		case cancelled
 	}
 	/// The current state of the migration operation.
-	private(set) public dynamic var state = State.ready
+	@objc private(set) public dynamic var state = State.ready
 	
 	private func cancel(with error: Error) {
 		self.error = error

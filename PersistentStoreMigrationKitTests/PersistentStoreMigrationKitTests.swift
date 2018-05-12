@@ -196,7 +196,7 @@ class PersistentStoreMigrationKitTests: XCTestCase {
 		migrationOperation.destinationModel = latestModel
 		migrationOperation.bundles = [testBundle]
 		migrationOperation.completionBlock = {
-			XCTAssertNil(migrationOperation.error, "Migration operation failed: \(migrationOperation.error)")
+			XCTAssertNil(migrationOperation.error, "Migration operation failed: \(migrationOperation.error!)")
 			operationExpectation.fulfill()
 		}
 		operationQueue.addOperation(migrationOperation)

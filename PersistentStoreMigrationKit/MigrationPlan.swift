@@ -11,41 +11,11 @@ import CoreData
 
 /// A `MigrationPlan` instance encapsulates the progressive migration from one `NSManagedObjectModel` to another with an arbitrary number of intermediate models.
 @objc public final class MigrationPlan: NSObject {
-    private var steps = [MigrationStep]()
+    private let steps: [MigrationStep]
     /// The number of steps in the plan. Zero, if the plan is empty.
     @objc public var stepCount: Int { return steps.count }
     /// Indicates whether executing the plan will do nothing.
     @objc public var isEmpty: Bool { return stepCount == 0 }
-
-    /// Aggregates all valid models in the given bundles.
-    ///
-    /// - Attention: Invalid model files will trigger assertion failures.
-    private static func models(in bundles: [Bundle]) -> [NSManagedObjectModel] {
-        var modelURLs: [URL] = []
-        // Collect simple Core Data model URLs
-        modelURLs += bundles.flatMap { (bundle) in
-            return bundle.urls(forResourcesWithExtension: "mom", subdirectory: nil) ?? []
-        }
-        // Collect versioned Core Data model URLs
-        modelURLs += bundles.flatMap { (bundle) -> [URL] in
-            guard let modelBundleURLs = bundle.urls(forResourcesWithExtension: "momd", subdirectory: nil) else { return [] }
-            return modelBundleURLs.flatMap { (modelBundleURL) -> [URL] in
-                guard let modelBundle = Bundle(url: modelBundleURL) else {
-                    assertionFailure("\(modelBundleURL) is not a valid versioned Core Data model (bundle).")
-                    return []
-                }
-                return modelBundle.urls(forResourcesWithExtension: "mom", subdirectory: nil) ?? []
-            }
-        }
-        // Load models at all the above URLs
-        return modelURLs.compactMap { (modelURL) in
-            guard let model = NSManagedObjectModel(contentsOf: modelURL) else {
-                assertionFailure("\(modelURL) is not a valid Core Data model.")
-                return nil
-            }
-            return model
-        }
-    }
     
     /// Devises a migration plan based on the metadata of an existing store, a destination managed object model and a list of bundles to search for intermediate models.
     /// 
@@ -62,45 +32,15 @@ import CoreData
         let _ = Progress(totalUnitCount: -1)
         guard !destinationModel.isConfiguration(withName: nil, compatibleWithStoreMetadata: storeMetadata) else {
             // No work to be done.
+            self.steps = []
             super.init()
             return
         }
-        guard let storeModelVersionHashes = storeMetadata[NSStoreModelVersionHashesKey] as? [String: Any] else {
-            throw Error.missingStoreModelVersionHashes
-        }
-        var latestModelVersionHashes = storeModelVersionHashes
-        let models = MigrationPlan.models(in: bundles)
-        while !(latestModelVersionHashes as NSDictionary).isEqual(to: destinationModel.entityVersionHashesByName) {
-            var stepSourceModel: NSManagedObjectModel!
-            for model in models {
-                if (model.entityVersionHashesByName as NSDictionary).isEqual(to: latestModelVersionHashes) {
-                    stepSourceModel = model
-                }
-            }
-            if stepSourceModel == nil {
-                throw Error.couldNotFindSourceModel
-            }
-            var stepDestinationModel: NSManagedObjectModel!
-            var stepMappingModel: NSMappingModel!
-            for model in models {
-                if let mappingModel = NSMappingModel(from: bundles, forSourceModel: stepSourceModel, destinationModel: model) {
-                    stepDestinationModel = model
-                    stepMappingModel = mappingModel
-                    break
-                }
-            }
-            if stepDestinationModel == nil ||
-                stepMappingModel == nil
-            {
-                throw Error.couldNotInferMappingSteps
-            }
-            latestModelVersionHashes = stepDestinationModel.entityVersionHashesByName as [String : AnyObject]
-            let migrationStep = MigrationStep(sourceModel: stepSourceModel, destinationModel: stepDestinationModel, mappingModel: stepMappingModel)
-            steps.append(migrationStep)
-        }
-        if steps.isEmpty {
+        let steps = try MigrationStep.stepsForMigratingExistingStore(withMetadata: storeMetadata, to: destinationModel, searchBundles: bundles)
+        guard !steps.isEmpty else {
             throw Error.couldNotInferMappingSteps
         }
+        self.steps = steps
         super.init()
     }
     

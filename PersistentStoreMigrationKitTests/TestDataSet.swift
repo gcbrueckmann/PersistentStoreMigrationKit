@@ -30,31 +30,6 @@ final class TestDataSet {
         storeURLs = Dictionary(uniqueKeysWithValues: zip(modelVersions, stores))
     }
 
-    func infoForPristineStore(for modelVersion: ModelVersion, ofType storeType: String) -> PersistentStoreInfo {
-        let storeURL = pristineStoreURL(for: modelVersion)
-        let storeMetadata: [String: Any]
-        do {
-            storeMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: storeType, at: storeURL)
-        } catch {
-            preconditionFailure("Could not retrieve store metadata: \(error)")
-        }
-        
-        return PersistentStoreInfo(url: storeURL, metadata: storeMetadata)
-    }
-
-    struct PersistentStoreInfo {
-
-        let url: URL
-        let metadata: [String: Any]
-    }
-
-    func copyStore(for modelVersion: ModelVersion, ofType storeType: String, to destinationURL: URL) throws {
-        let pristineStoreURL = self.pristineStoreURL(for: modelVersion)
-        let persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: modelVersion.model)
-        let pristinePersistentStore = try persistentStoreCoordinator.addPersistentStore(ofType: storeType, configurationName: nil, at: pristineStoreURL, options: nil)
-        try persistentStoreCoordinator.migratePersistentStore(pristinePersistentStore, to: destinationURL, options: nil, withType: storeType)
-    }
-
     /// Returns a URL identifying a pristine copy for a given model version.
     /// You should treat the store at the returned URL as read-only.
     private func pristineStoreURL(for modelVersion: ModelVersion) -> URL {
@@ -141,5 +116,26 @@ extension TestDataSet {
 
             return Array(allVersions.suffix(from: earlierIndex + 1))
         }
+    }
+}
+
+extension TestDataSet {
+
+    struct PersistentStoreInfo {
+
+        let url: URL
+        let metadata: [String: Any]
+    }
+
+    func infoForPristineStore(for modelVersion: ModelVersion, ofType storeType: String) -> PersistentStoreInfo {
+        let storeURL = pristineStoreURL(for: modelVersion)
+        let storeMetadata: [String: Any]
+        do {
+            storeMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: storeType, at: storeURL)
+        } catch {
+            preconditionFailure("Could not retrieve store metadata: \(error)")
+        }
+
+        return PersistentStoreInfo(url: storeURL, metadata: storeMetadata)
     }
 }

@@ -50,15 +50,4 @@ final class TestDataSetTests: XCTestCase {
         let dataSet = try TestDataSet(at: dataSetURL, storeType: storeType)
         XCTAssertEqual(dataSet.modelVersions, TestDataSet.ModelVersion.all(), "Data set should contain all model versions.")
     }
-
-    func testDataSetCopiesStoresSuccessfully() throws {
-        let dataSetURL = workingDirectoryURL.appendingPathComponent(ProcessInfo.processInfo.globallyUniqueString)
-        let dataSet = try TestDataSet(at: dataSetURL, storeType: storeType)
-
-        for modelVersion in dataSet.modelVersions {
-            let storeCopyURL = workingDirectoryURL.appendingPathComponent(ProcessInfo.processInfo.globallyUniqueString)
-            try dataSet.copyStore(for: modelVersion, ofType: storeType, to: storeCopyURL)
-            XCTAssertTrue(FileManager.default.fileExists(atPath: storeCopyURL.path), "File should exist at copy location after making a copy of the \(modelVersion) store.")
-        }
-    }
 }

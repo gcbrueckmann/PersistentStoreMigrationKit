@@ -49,6 +49,7 @@ final class MigrationTests: XCTestCase {
         super.tearDown()
     }
 
+    /// Verifies step aggregation for A → A migrations.
     func testAToAYieldsNoSteps() throws {
         let storeInfo = testDataSet.infoForPristineStore(for: .v1, ofType: storeType)
 
@@ -57,6 +58,7 @@ final class MigrationTests: XCTestCase {
         XCTAssertTrue(steps.isEmpty)
     }
 
+    /// Verifies step aggregation for A → B migrations.
     func testAToBYieldsOneStep() throws {
         let storeInfo = testDataSet.infoForPristineStore(for: .v1, ofType: storeType)
 
@@ -65,6 +67,7 @@ final class MigrationTests: XCTestCase {
         XCTAssertEqual(steps.count, 1)
     }
 
+    /// Verifies step aggregation for A → C migrations.
     func testAToCYieldsTwoSteps() throws {
         let storeInfo = testDataSet.infoForPristineStore(for: .v1, ofType: storeType)
 
@@ -73,12 +76,14 @@ final class MigrationTests: XCTestCase {
         XCTAssertEqual(steps.count, 2)
     }
 
+    /// Verifies step aggregation for A → †D migrations (where there is no known migration path from, e.g., C to D).
     func testAToUnsupportedDThrows() throws {
         let storeInfo = testDataSet.infoForPristineStore(for: .v1, ofType: storeType)
 
         XCTAssertThrowsError(try MigrationStep.stepsForMigratingExistingStore(withMetadata: storeInfo.metadata, to: TestDataSet.ModelVersion.v4.model, searchBundles: [.test]))
     }
 
+    /// Verifies migration plan execution for A → A migrations.
     func testAToAExecutesSuccessfully() throws {
         let pristineStoreInfo = testDataSet.infoForPristineStore(for: .v1, ofType: storeType)
         let migratedStoreURL = workingDirectoryURL.appendingPathComponent(ProcessInfo.processInfo.globallyUniqueString)
@@ -88,6 +93,7 @@ final class MigrationTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: migratedStoreURL.path))
     }
 
+    /// Verifies migration plan execution for A → B migrations.
     func testAToBExecutesSuccessfully() throws {
         let pristineStoreInfo = testDataSet.infoForPristineStore(for: .v1, ofType: storeType)
         let migratedStoreURL = workingDirectoryURL.appendingPathComponent(ProcessInfo.processInfo.globallyUniqueString)
@@ -97,6 +103,7 @@ final class MigrationTests: XCTestCase {
         XCTAssertValidStore(at: migratedStoreURL, ofType: storeType, for: TestDataSet.ModelVersion.v2.model)
     }
 
+    /// Verifies migration plan execution for A → C migrations.
     func testAToCExecutesSuccessfully() throws {
         let pristineStoreInfo = testDataSet.infoForPristineStore(for: .v1, ofType: storeType)
         let migratedStoreURL = workingDirectoryURL.appendingPathComponent(ProcessInfo.processInfo.globallyUniqueString)
@@ -106,6 +113,7 @@ final class MigrationTests: XCTestCase {
         XCTAssertValidStore(at: migratedStoreURL, ofType: storeType, for: TestDataSet.ModelVersion.v3.model)
     }
     
+    /// Verifies that migration plan execution fails when the source store does not exist.
     func testMigrationFailsWhenSourceStoreDoesNotExist() throws {
         let pristineStoreInfo = testDataSet.infoForPristineStore(for: .v1, ofType: storeType)
         let storeURL = pristineStoreInfo.url.deletingLastPathComponent().appendingPathComponent("Store That Does Not Exist", isDirectory: false)
@@ -116,6 +124,7 @@ final class MigrationTests: XCTestCase {
         XCTAssertThrowsError(try migrationPlan.executeForStore(at: storeURL, type: storeType, destinationURL: migratedStoreURL, storeType: storeType), "Executing a migration plan for a non-existant source store should fail.")
     }
 
+    /// Verifies that migration operations execute successfully (when backed by a working migration plan).
     func testMigrationOperationExecutesSuccessfully() {
         let pristineStoreInfo = testDataSet.infoForPristineStore(for: .v1, ofType: storeType)
         let migratedStoreURL = workingDirectoryURL.appendingPathComponent(ProcessInfo.processInfo.globallyUniqueString)

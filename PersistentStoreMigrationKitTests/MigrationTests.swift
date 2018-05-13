@@ -150,6 +150,34 @@ final class MigrationTests: XCTestCase {
         }
     }
 
+    /// Verifies that migration operations become ready only once they are fully configured.
+    func testMigrationOperationBecomesReadyOnceFullyConfigured() {
+        let pristineStoreInfo = testDataSet.infoForPristineStore(for: .v1, ofType: storeType)
+        let migratedStoreURL = workingDirectoryURL.appendingPathComponent(ProcessInfo.processInfo.globallyUniqueString)
+        let latestModel = TestDataSet.ModelVersion.latestWithMigrationPath.model
+
+        let migrationOperation = MigrationOperation()
+        XCTAssertFalse(migrationOperation.isReady)
+
+        migrationOperation.sourceURL = pristineStoreInfo.url
+        XCTAssertFalse(migrationOperation.isReady)
+
+        migrationOperation.sourceStoreType = storeType
+        XCTAssertFalse(migrationOperation.isReady)
+
+        migrationOperation.destinationURL = migratedStoreURL
+        XCTAssertFalse(migrationOperation.isReady)
+
+        migrationOperation.destinationStoreType = storeType
+        XCTAssertFalse(migrationOperation.isReady)
+
+        migrationOperation.destinationModel = latestModel
+        XCTAssertFalse(migrationOperation.isReady)
+
+        migrationOperation.bundles = [.test]
+        XCTAssertTrue(migrationOperation.isReady)
+    }
+
     /// Verifies that migration operations fail when the source store does not exist
     func testMigrationOperationFailsWhenSourceStoreDoesNotExist() {
         let pristineStoreInfo = testDataSet.infoForPristineStore(for: .v1, ofType: storeType)

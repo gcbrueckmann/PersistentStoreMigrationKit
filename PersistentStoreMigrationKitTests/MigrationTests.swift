@@ -11,7 +11,7 @@ import CoreData
 import XCTest
 @testable import PersistentStoreMigrationKit
 
-final class PersistentStoreMigrationKitTests: XCTestCase {
+final class MigrationTests: XCTestCase {
 
     private var workingDirectoryURL: URL!
     private let storeType = NSSQLiteStoreType

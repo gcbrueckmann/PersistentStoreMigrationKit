@@ -19,7 +19,7 @@
 		ED6930931B8E4E0300F9493D /* MigrationStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6930921B8E4E0300F9493D /* MigrationStep.swift */; };
 		EDA89C2F1B8DEE7F00E9B761 /* PersistentStoreMigrationKit.h in Headers */ = {isa = PBXBuildFile; fileRef = EDA89C2E1B8DEE7F00E9B761 /* PersistentStoreMigrationKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EDA89C351B8DEE7F00E9B761 /* PersistentStoreMigrationKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDA89C291B8DEE7F00E9B761 /* PersistentStoreMigrationKit.framework */; };
-		EDA89C3C1B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA89C3B1B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests.swift */; };
+		EDA89C3C1B8DEE7F00E9B761 /* MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA89C3B1B8DEE7F00E9B761 /* MigrationTests.swift */; };
 		EDA89C461B8DEEA800E9B761 /* MigrationOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA89C451B8DEEA800E9B761 /* MigrationOperation.swift */; };
 		EDA89C561B8DF15200E9B761 /* TestModelV1.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = EDA89C551B8DF15200E9B761 /* TestModelV1.xcdatamodel */; };
 		EDA89C5A1B8DF15B00E9B761 /* TestModelV3.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = EDA89C581B8DF15B00E9B761 /* TestModelV3.xcdatamodel */; };
@@ -48,7 +48,7 @@
 		EDA89C2E1B8DEE7F00E9B761 /* PersistentStoreMigrationKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PersistentStoreMigrationKit.h; sourceTree = "<group>"; };
 		EDA89C341B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PersistentStoreMigrationKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EDA89C3A1B8DEE7F00E9B761 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		EDA89C3B1B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentStoreMigrationKitTests.swift; sourceTree = "<group>"; };
+		EDA89C3B1B8DEE7F00E9B761 /* MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationTests.swift; sourceTree = "<group>"; };
 		EDA89C451B8DEEA800E9B761 /* MigrationOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MigrationOperation.swift; sourceTree = "<group>"; };
 		EDA89C4E1B8DF0B500E9B761 /* ModelV1ToModelV2.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = ModelV1ToModelV2.xcmappingmodel; sourceTree = "<group>"; };
 		EDA89C511B8DF11400E9B761 /* ModelV2ToModelV3.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = ModelV2ToModelV3.xcmappingmodel; sourceTree = "<group>"; };
@@ -119,7 +119,7 @@
 		EDA89C381B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests */ = {
 			isa = PBXGroup;
 			children = (
-				EDA89C3B1B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests.swift */,
+				EDA89C3B1B8DEE7F00E9B761 /* MigrationTests.swift */,
 				5B9AF29720A8406D0065D972 /* Bundle+Test.swift */,
 				5B9AF29320A761A90065D972 /* TestDataSet.swift */,
 				5B9AF29520A83C3D0065D972 /* TestDataSetTests.swift */,
@@ -270,7 +270,7 @@
 				ED27A2C61B8F46B9005FAFCB /* ModelV1ToModelV2.xcmappingmodel in Sources */,
 				EDA89C561B8DF15200E9B761 /* TestModelV1.xcdatamodel in Sources */,
 				5B9AF29820A8406D0065D972 /* Bundle+Test.swift in Sources */,
-				EDA89C3C1B8DEE7F00E9B761 /* PersistentStoreMigrationKitTests.swift in Sources */,
+				EDA89C3C1B8DEE7F00E9B761 /* MigrationTests.swift in Sources */,
 				EDA89C5A1B8DF15B00E9B761 /* TestModelV3.xcdatamodel in Sources */,
 				5B9AF29420A761A90065D972 /* TestDataSet.swift in Sources */,
 			);

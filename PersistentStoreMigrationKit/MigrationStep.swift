@@ -11,7 +11,7 @@ import CoreData
 
 /// A `MigrationStep` instance encapsulates the migration from one `NSManagedObjectModel` to another without any intermediate models.
 /// Migration is performed via an `NSMigrationManager` using an `NSMappingModel`.
-final class MigrationStep: NSObject {
+final class MigrationStep {
     /// Specifies how to from `sourceModel` to `destinationModel`.
     let mappingModel: NSMappingModel
     /// The model to migrate from.

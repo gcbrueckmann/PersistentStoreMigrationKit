@@ -9,11 +9,13 @@
 import Foundation
 import CoreData
 
-/// A `MigrationStep` instance encapsulates the migration from one `NSManagedObjectModel` to another without any intermediate models.
-/// Migration is performed via an `NSMigrationManager` using an `NSMappingModel`.
-final class MigrationStep {
+/// A migration step encapsulates the migration from one `NSManagedObjectModel` to another without any intermediate models.
+///
+/// Source and destination models can be the same (if you want to copy stores without changing the model).
+struct MigrationStep {
+    
     /// Specifies how to from `sourceModel` to `destinationModel`.
-    let mappingModel: NSMappingModel
+    let mappingModel: NSMappingModel?
     /// The model to migrate from.
     let sourceModel: NSManagedObjectModel
     /// The model to migrate to.
@@ -30,8 +32,15 @@ final class MigrationStep {
         self.destinationModel = destinationModel
         self.mappingModel = mappingModel
     }
-    
-    private var progress: Progress?
+
+    /// Initializes a migration step for single source and destination model.
+    ///
+    /// - parameters model: The model to migrate from and to.
+    init(model: NSManagedObjectModel) {
+        self.sourceModel = model
+        self.destinationModel = model
+        self.mappingModel = nil
+    }
     
     /// Performs the migration from the persistent store identified by `sourceURL` and using `sourceModel` to `destinationModel`, saving the result in the persistent store identified by `destinationURL`.
     /// 
@@ -44,8 +53,6 @@ final class MigrationStep {
     ///   - destinationStoreType: A string constant (such as `NSSQLiteStoreType`) that specifies the destination store type.
     func executeForStore(at sourceURL: URL, type sourceStoreType: String, destinationURL: URL, storeType destinationStoreType: String) throws {
         let progress = Progress(totalUnitCount: 100)
-        self.progress = progress
-        defer { self.progress = nil }
 
         let migrationManager = NSMigrationManager(sourceModel: sourceModel, destinationModel: destinationModel)
         let migrationProgressObserver = migrationManager.observe(\.migrationProgress, options: .new) { (_, change) in

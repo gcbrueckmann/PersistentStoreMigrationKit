@@ -39,19 +39,16 @@ final class TestDataSetTests: XCTestCase {
     }
 
     func testLaterVersionsAreIdentifiedCorrectly() {
-        XCTAssertEqual(TestDataSet.ModelVersion.versions(after: .v1), [.v2, .v3])
-        XCTAssertEqual(TestDataSet.ModelVersion.versions(after: .v2), [.v3])
-        XCTAssertEqual(TestDataSet.ModelVersion.versions(after: .v3), [])
-    }
-
-    func testLatestVersionIsIdentifiedCorrectly() {
-        XCTAssertEqual(TestDataSet.ModelVersion.latest, .v3)
+        XCTAssertEqual(TestDataSet.ModelVersion.versions(after: .v1), [.v2, .v3, .v4])
+        XCTAssertEqual(TestDataSet.ModelVersion.versions(after: .v2), [.v3, .v4])
+        XCTAssertEqual(TestDataSet.ModelVersion.versions(after: .v3), [.v4])
+        XCTAssertEqual(TestDataSet.ModelVersion.versions(after: .v4), [])
     }
 
     func testDataSetIsCreatedSuccessfully() throws {
         let dataSetURL = workingDirectoryURL.appendingPathComponent(ProcessInfo.processInfo.globallyUniqueString)
         let dataSet = try TestDataSet(at: dataSetURL, storeType: storeType)
-        XCTAssertEqual(dataSet.modelVersions, TestDataSet.ModelVersion.all, "Data set should contain all model versions.")
+        XCTAssertEqual(dataSet.modelVersions, TestDataSet.ModelVersion.all(), "Data set should contain all model versions.")
     }
 
     func testDataSetCopiesStoresSuccessfully() throws {

@@ -20,7 +20,7 @@ final class TestDataSet {
         self.containerDirectoryURL = url
 
         // Create stores for all model versions
-        self.modelVersions = ModelVersion.all
+        self.modelVersions = ModelVersion.all()
         let stores = try modelVersions.map { (modelVersion) -> URL in
             let storeURL = url.appendingPathComponent("PristineStore-\(modelVersion.identifier)")
             try TestDataSet.createStore(at: storeURL, type: storeType, using: modelVersion)
@@ -28,6 +28,24 @@ final class TestDataSet {
             return storeURL
         }
         storeURLs = Dictionary(uniqueKeysWithValues: zip(modelVersions, stores))
+    }
+
+    func infoForPristineStore(for modelVersion: ModelVersion, ofType storeType: String) -> PersistentStoreInfo {
+        let storeURL = pristineStoreURL(for: modelVersion)
+        let storeMetadata: [String: Any]
+        do {
+            storeMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: storeType, at: storeURL)
+        } catch {
+            preconditionFailure("Could not retrieve store metadata: \(error)")
+        }
+        
+        return PersistentStoreInfo(url: storeURL, metadata: storeMetadata)
+    }
+
+    struct PersistentStoreInfo {
+
+        let url: URL
+        let metadata: [String: Any]
     }
 
     func copyStore(for modelVersion: ModelVersion, ofType storeType: String, to destinationURL: URL) throws {
@@ -90,21 +108,38 @@ extension TestDataSet {
         static let v3 = ModelVersion(versionCounter: 3)
         static let v4 = ModelVersion(versionCounter: 4)
 
-        static let all: [ModelVersion] = [
-            .v1,
-            .v2,
-            .v3
-        ]
+        static func all(supportingMigrationOnly: Bool = false) -> [ModelVersion] {
+            let versionsSupportingMigration: [ModelVersion] = [
+                .v1,
+                .v2,
+                .v3
+            ]
+            let versionsNotSupportingMigration: [ModelVersion] = [
+                .v4
+            ]
 
-        static var latest: ModelVersion {
-            return all.last!
+            if supportingMigrationOnly {
+                return versionsSupportingMigration
+            } else {
+                return versionsSupportingMigration + versionsNotSupportingMigration
+            }
         }
 
-        static func versions(after earlierVersion: ModelVersion) -> [ModelVersion] {
-            guard let earlierIndex = all.index(of: earlierVersion) else {
+        static var latestWithMigrationPath: ModelVersion {
+            return .v3
+        }
+
+        static var latestWithoutMigrationPath: ModelVersion {
+            return .v4
+        }
+
+        static func versions(after earlierVersion: ModelVersion, supportingMigrationOnly: Bool = false) -> [ModelVersion] {
+            let allVersions = all(supportingMigrationOnly: supportingMigrationOnly)
+            guard let earlierIndex = allVersions.index(of: earlierVersion) else {
                 preconditionFailure("Unknown version (\(earlierVersion))")
             }
-            return Array(all.suffix(from: earlierIndex + 1))
+
+            return Array(allVersions.suffix(from: earlierIndex + 1))
         }
     }
 }

@@ -50,12 +50,14 @@ final class MigrationStepTests: XCTestCase {
     }
 
     /// Verifies step aggregation for A → A migrations.
-    func testAToAYieldsNoSteps() throws {
+    func testAToAYieldsOneOptionalStep() throws {
         let storeInfo = testDataSet.infoForPristineStore(for: .v1, ofType: storeType)
 
         let steps = try MigrationStep.stepsForMigratingExistingStore(withMetadata: storeInfo.metadata, to: TestDataSet.ModelVersion.v1.model, searchBundles: [.test])
 
-        XCTAssertTrue(steps.isEmpty)
+        XCTAssertEqual(steps.count, 1)
+        guard let firstStep = steps.first else { return }
+        XCTAssertTrue(firstStep.isSameSourceAndDestinationModel)
     }
 
     /// Verifies step aggregation for A → B migrations.

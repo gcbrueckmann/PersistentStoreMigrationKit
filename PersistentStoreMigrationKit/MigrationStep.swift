@@ -16,10 +16,16 @@ struct MigrationStep {
     
     /// Specifies how to from `sourceModel` to `destinationModel`.
     let mappingModel: NSMappingModel?
+
     /// The model to migrate from.
     let sourceModel: NSManagedObjectModel
+
     /// The model to migrate to.
     let destinationModel: NSManagedObjectModel
+
+    var isSameSourceAndDestinationModel: Bool {
+        return ((sourceModel.entityVersionHashesByName as NSDictionary) == (destinationModel.entityVersionHashesByName as NSDictionary))
+    }
     
     /// Initializes a migration step for a source model, destination model, and a mapping model.
     /// 
@@ -75,10 +81,17 @@ extension MigrationStep {
     ///
     /// - Throws: Throws an error, if the necessary steps cannot be determined.
     static func stepsForMigratingExistingStore(withMetadata storeMetadata: [String: Any], to destinationModel: NSManagedObjectModel, searchBundles bundles: [Bundle]) throws -> [MigrationStep] {
-        var steps: [MigrationStep] = []
+        if destinationModel.isConfiguration(withName: nil, compatibleWithStoreMetadata: storeMetadata) {
+            // No migration strictly necessary, but we still need to return one step,
+            // because the migration might be executed with a different source and destination.
+            return [MigrationStep(model: destinationModel)]
+        }
+
         guard let storeModelVersionHashes = storeMetadata[NSStoreModelVersionHashesKey] as? [String: Any] else {
             throw Error.missingStoreModelVersionHashes
         }
+
+        var steps: [MigrationStep] = []
         var latestModelVersionHashes = storeModelVersionHashes
         let models = NSManagedObjectModel.models(in: bundles)
         while !(latestModelVersionHashes as NSDictionary).isEqual(to: destinationModel.entityVersionHashesByName) {

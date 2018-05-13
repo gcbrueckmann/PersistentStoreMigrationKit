@@ -12,20 +12,52 @@ import CoreData
 /// A `MigrationOperation` instance encapsulates the progressive migration from one `NSManagedObjectModel` to another with an arbitrary number of intermediate models.
 /// This is a companion to and implemented on top of the `MigrationPlan` class.
 @objc public final class MigrationOperation: Operation {
+
     /// Identifies the persistent store to migrate from.
-    @objc public var sourceURL: URL!
+    ///
+    /// This is a required operation property.
+    @objc public var sourceURL: URL! {
+        didSet { becomeReadyIfPossible() }
+    }
+
     /// A string constant (such as `NSSQLiteStoreType`) that specifies the source store type.
-    @objc public var sourceStoreType: String!
+    ///
+    /// This is a required operation property.
+    @objc public var sourceStoreType: String! {
+        didSet { becomeReadyIfPossible() }
+    }
+
     /// Identifies the persistent store to migrate to. May be identical to `sourceURL`.
-    @objc public var destinationURL: URL!
+    ///
+    /// This is a required operation property.
+    @objc public var destinationURL: URL! {
+        didSet { becomeReadyIfPossible() }
+    }
+
     /// A string constant (such as `NSSQLiteStoreType`) that specifies the destination store type.
-    @objc public var destinationStoreType: String!
+    ///
+    /// This is a required operation property.
+    @objc public var destinationStoreType: String! {
+        didSet { becomeReadyIfPossible() }
+    }
+
     /// The model to migrate to.
-    @objc public var destinationModel: NSManagedObjectModel!
+    ///
+    /// This is a required operation property.
+    @objc public var destinationModel: NSManagedObjectModel! {
+        didSet { becomeReadyIfPossible() }
+    }
+
     /// A list of bundles to search for the source model and intermediate models.
-    @objc public var bundles: [Bundle]!
+    ///
+    /// This is a required operation property.
+    @objc public var bundles: [Bundle]! {
+        didSet { becomeReadyIfPossible() }
+    }
+
     /// The overall progress of the migration operation.
     @objc public let progress: Progress
+    
     /// Any error that may have occured during the execution of the migration operation.
     @objc public private(set) var error: Swift.Error?
 
@@ -37,8 +69,30 @@ import CoreData
         super.init()
     }
 
+    /// Indicates whether all required configuration properties have been set.
+    private var isFullyConfigured: Bool {
+        guard sourceURL != nil else { return false }
+        guard sourceStoreType != nil else { return false }
+        guard destinationURL != nil else { return false }
+        guard destinationStoreType != nil else { return false }
+        guard destinationModel != nil else { return false }
+        guard bundles != nil else { return false }
+
+        return true
+    }
+
+    /// Advances the operation’s state to `.ready`, if the operation is fully configured.
+    private func becomeReadyIfPossible() {
+        guard state == .awaitingConfiguration else { return }
+        guard isFullyConfigured else { return }
+
+        state = .ready
+    }
+
     /// Defines possible migration operation states.
     @objc public enum State: Int {
+        /// The migration operation is missing required configuration details.
+        case awaitingConfiguration
         /// The migration operation is ready to execute.
         case ready
         /// The migration operation is executing.
@@ -49,12 +103,7 @@ import CoreData
         case cancelled
     }
     /// The current state of the migration operation.
-    @objc private(set) public dynamic var state = State.ready
-
-    private func cancel(with error: Swift.Error) {
-        self.error = error
-        state = .cancelled
-    }
+    @objc private(set) public dynamic var state: State = .awaitingConfiguration
 
     // MARK: NSOperation
     public override func start() {
@@ -64,36 +113,26 @@ import CoreData
         precondition(destinationStoreType != nil, "Missing desetination store type.")
         precondition(destinationModel != nil, "Missing destination model.")
         precondition(bundles != nil, "Missing bundles.")
+
         state = .executing
-
-        let existingStoreMetadata: [String: AnyObject]
         do {
-            existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: sourceStoreType, at: sourceURL) as [String : AnyObject]
-        } catch {
-            cancel(with: error)
-            return
-        }
+            // Get store metadata.
+            let existingStoreMetadata = try progress.performAsCurrent(withPendingUnitCount: 5) {
+                return try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: sourceStoreType, at: sourceURL) as [String : AnyObject]
+            }
 
-        // Devise migration plan.
-        let migrationPlan: MigrationPlan
-        do {
-            migrationPlan = try MigrationPlan(storeMetadata: existingStoreMetadata, destinationModel: destinationModel, bundles: bundles)
-        } catch {
-            cancel(with: error)
-            return
-        }
-        progress.completedUnitCount += 10
+            // Devise migration plan.
+            let migrationPlan = try progress.performAsCurrent(withPendingUnitCount: 10) {
+                return try MigrationPlan(storeMetadata: existingStoreMetadata, destinationModel: destinationModel, bundles: bundles)
+            }
 
-        // Execute migration plan.
-        progress.becomeCurrent(withPendingUnitCount: 90)
-        do {
-            try migrationPlan.executeForStore(at: sourceURL, type: sourceStoreType, destinationURL: destinationURL, storeType: destinationStoreType)
+            // Execute migration plan.
+            try progress.performAsCurrent(withPendingUnitCount: 85) {
+                try migrationPlan.executeForStore(at: sourceURL, type: sourceStoreType, destinationURL: destinationURL, storeType: destinationStoreType)
+            }
         } catch {
-            cancel(with: error)
-            return
+            self.error = error
         }
-        progress.resignCurrent()
-
         state = .finished
     }
 

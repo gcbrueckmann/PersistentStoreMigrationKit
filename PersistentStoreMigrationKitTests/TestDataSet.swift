@@ -88,6 +88,7 @@ extension TestDataSet {
         static let v1 = ModelVersion(versionCounter: 1)
         static let v2 = ModelVersion(versionCounter: 2)
         static let v3 = ModelVersion(versionCounter: 3)
+        static let v4 = ModelVersion(versionCounter: 4)
 
         static let all: [ModelVersion] = [
             .v1,

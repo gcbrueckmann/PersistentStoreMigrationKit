@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14133" systemVersion="17E199" minimumToolsVersion="Xcode 4.3" sourceLanguage="Objective-C" userDefinedModelVersionIdentifier="">
+    <entity name="TestEntity1" syncable="YES">
+        <attribute name="attribute1" attributeType="String" defaultValueString="untitled" syncable="YES"/>
+        <relationship name="testEntity2" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="TestEntity2" inverseName="testEntity1" inverseEntity="TestEntity2" syncable="YES"/>
+    </entity>
+    <entity name="TestEntity2" syncable="YES">
+        <attribute name="attribute1" attributeType="String" defaultValueString="untitled" syncable="YES"/>
+        <relationship name="testEntity1" maxCount="1" deletionRule="Nullify" destinationEntity="TestEntity1" inverseName="testEntity2" inverseEntity="TestEntity1" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="TestEntity1" positionX="-63" positionY="-18" width="128" height="75"/>
+        <element name="TestEntity2" positionX="-45" positionY="9" width="128" height="75"/>
+    </elements>
+</model>

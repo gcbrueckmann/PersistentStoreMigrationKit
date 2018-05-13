@@ -11,15 +11,10 @@ import CoreData
 
 /// A `MigrationPlan` instance encapsulates the progressive migration from one `NSManagedObjectModel` to another with an arbitrary number of intermediate models.
 @objc public final class MigrationPlan: NSObject {
+
     private let steps: [MigrationStep]
-    /// The number of steps in the plan. Zero, if the plan is empty.
-    @objc public var numberOfSteps: Int { return steps.count }
-    /// Indicates whether executing the plan will do nothing.
-    @objc public var isEmpty: Bool { return numberOfSteps == 0 }
     
     /// Devises a migration plan based on the metadata of an existing store, a destination managed object model and a list of bundles to search for intermediate models.
-    /// 
-    /// If no migration is necessary (i.e. the existing store's metadata is compatible with the destination model), the initialized plan will be empty.
     /// 
     /// - Throws: Throws an error if a migration plan cannot be devised.
     /// 
@@ -30,12 +25,6 @@ import CoreData
     @objc public init(storeMetadata: [String: Any], destinationModel: NSManagedObjectModel, bundles: [Bundle]) throws {
         precondition(!bundles.isEmpty, "Bundles must be non-empty.")
         let _ = Progress(totalUnitCount: -1)
-        guard !destinationModel.isConfiguration(withName: nil, compatibleWithStoreMetadata: storeMetadata) else {
-            // No work to be done.
-            self.steps = []
-            super.init()
-            return
-        }
         let steps = try MigrationStep.stepsForMigratingExistingStore(withMetadata: storeMetadata, to: destinationModel, searchBundles: bundles)
         guard !steps.isEmpty else {
             throw Error.couldNotInferMappingSteps
@@ -43,7 +32,12 @@ import CoreData
         self.steps = steps
         super.init()
     }
-    
+
+    /// Indicates whether executing the plan is required to be able to open the existing persistent store.
+    @objc public var isExecutionRequiredForStoreCompatibility: Bool {
+        return steps.contains(where: { !$0.isSameSourceAndDestinationModel })
+    }
+
     /// Performs the migration from the persistent store identified by `sourceURL` to `destinationModel`, saving the result in the persistent store identified by `destinationURL`.
     /// The migration is guaranteed to be atomic.
     /// 
@@ -55,8 +49,6 @@ import CoreData
     ///   - destinationURL: Identifies the persistent store to migrate to. May be identical to `sourceURL`.
     ///   - destinationStoreType: A string constant (such as `NSSQLiteStoreType`) that specifies the destination store type.
     @objc public func executeForStore(at sourceURL: URL, type sourceStoreType: String, destinationURL: URL, storeType destinationStoreType: String) throws {
-        guard !isEmpty else { return }
-
         // 10% setup, 80% actual migration steps, 10% cleanup.
         let overallProgress = Progress(totalUnitCount: 100)
         
@@ -72,7 +64,7 @@ import CoreData
         var latestStoreURL = sourceURL
         var latestStoreType = sourceStoreType
         for (stepIndex, step) in steps.enumerated() {
-            let stepDestinationURL = storeReplacementDirectory.appendingPathComponent("Migrated Store (Step \(stepIndex + 1) of \(numberOfSteps))", isDirectory: false)
+            let stepDestinationURL = storeReplacementDirectory.appendingPathComponent("Migrated Store (Step \(stepIndex + 1) of \(steps.count))", isDirectory: false)
             var stepError: Swift.Error?
             do {
                 steppingProgress.becomeCurrent(withPendingUnitCount: 1)

@@ -11,27 +11,14 @@ import CoreData
 import XCTest
 @testable import PersistentStoreMigrationKit
 
-class PersistentStoreMigrationKitTests: XCTestCase {
-    private var models: [NSManagedObjectModel] = []
+final class PersistentStoreMigrationKitTests: XCTestCase {
+
     private var workingDirectoryURL: URL!
     private let storeType = NSSQLiteStoreType
-    private var testBundle: Bundle!
+    private var testDataSet: TestDataSet!
     
     override func setUp() {
         super.setUp()
-        testBundle = Bundle(for: type(of: self))
-
-        for versionNumber in 1...3 {
-            guard let modelURL = testBundle.url(forResource: "TestModelV\(versionNumber)", withExtension: "mom") else {
-                XCTFail("Could not locate V\(versionNumber) test model.")
-                continue
-            }
-            guard let model = NSManagedObjectModel(contentsOf: modelURL) else {
-                XCTFail("Could not load V\(versionNumber) test model.")
-                continue
-            }
-            models.append(model)
-        }
 
         // Create working directory.
         let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
@@ -40,6 +27,14 @@ class PersistentStoreMigrationKitTests: XCTestCase {
             try FileManager.default.createDirectory(at: workingDirectoryURL, withIntermediateDirectories: true, attributes: nil)
         } catch {
             XCTFail("Could not create working directory: \(error)")
+        }
+
+        // Create test data set
+        do {
+            let testDataSetURL = workingDirectoryURL.appendingPathComponent("Pristine Data Set", isDirectory: true)
+            testDataSet = try TestDataSet(at: testDataSetURL, storeType: storeType)
+        } catch {
+            XCTFail("Could not create test data set: \(error)")
         }
     }
     
@@ -54,21 +49,16 @@ class PersistentStoreMigrationKitTests: XCTestCase {
         super.tearDown()
     }
     
-    private func initializeStoreAtURL(_ storeURL: URL) throws {
-        let initialPersistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: models.first!)
-        try initialPersistentStoreCoordinator.addPersistentStore(ofType: storeType, configurationName: nil, at: storeURL, options: nil)
-    }
-    
     func testManualStoreMigration() {
         let storeURL = workingDirectoryURL.appendingPathComponent("Manually Migrated Store", isDirectory: false)
         do {
-            try initializeStoreAtURL(storeURL)
+            try testDataSet.copyStore(for: .v1, ofType: storeType, to: storeURL)
         } catch {
             XCTFail("Could not initialize persistent store: \(error)")
             return
         }
 
-        for newerModel in models[models.indices.suffix(from: 1)] {
+        for newerModel in TestDataSet.ModelVersion.versions(after: .v1).map({ $0.model }) {
             let existingStoreMetadata: [String: AnyObject]
             do {
                 existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: storeType, at: storeURL) as [String : AnyObject]
@@ -81,7 +71,7 @@ class PersistentStoreMigrationKitTests: XCTestCase {
                 return
             }
             var sourceModel: NSManagedObjectModel!
-            for model in models {
+            for model in TestDataSet.ModelVersion.all.map({ $0.model }) {
                 if (model.entityVersionHashesByName as NSDictionary).isEqual(to: existingStoreVersionHashes) {
                     sourceModel = model
                     break
@@ -99,7 +89,7 @@ class PersistentStoreMigrationKitTests: XCTestCase {
             for (entityName, versionHash) in newerModel.entityVersionHashesByName {
                 print("\(entityName): \(versionHash)")
             }
-            guard let mappingModel = NSMappingModel(from: [testBundle], forSourceModel: sourceModel!, destinationModel: newerModel) else {
+            guard let mappingModel = NSMappingModel(from: [Bundle.test], forSourceModel: sourceModel!, destinationModel: newerModel) else {
                 XCTFail("Could not find a model for mapping \(sourceModel) to \(newerModel).")
                 return
             }
@@ -136,13 +126,13 @@ class PersistentStoreMigrationKitTests: XCTestCase {
     func testAutomaticMigration() {
         let storeURL = workingDirectoryURL.appendingPathComponent("Automatically Migrated Store", isDirectory: false)
         do {
-            try initializeStoreAtURL(storeURL)
+            try testDataSet.copyStore(for: .v1, ofType: storeType, to: storeURL)
         } catch {
             XCTFail("Could not initialize persistent store: \(error)")
             return
         }
 
-        let latestModel = models.last!
+        let latestModel = TestDataSet.ModelVersion.latest.model
         let existingStoreMetadata: [String: AnyObject]
         do {
             existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: storeType, at: storeURL) as [String : AnyObject]
@@ -152,12 +142,12 @@ class PersistentStoreMigrationKitTests: XCTestCase {
         }
         let migrationPlan: MigrationPlan
         do {
-            migrationPlan = try MigrationPlan(storeMetadata: existingStoreMetadata, destinationModel: latestModel, bundles: [testBundle])
+            migrationPlan = try MigrationPlan(storeMetadata: existingStoreMetadata, destinationModel: latestModel, bundles: [Bundle.test])
         } catch {
             XCTFail("Could not devise migration plan for \(storeURL): \(error)")
             return
         }
-        let expectedMigrationPlanStepCount = models.count - 1
+        let expectedMigrationPlanStepCount = TestDataSet.ModelVersion.all.count - 1
         XCTAssertEqual(migrationPlan.numberOfSteps, expectedMigrationPlanStepCount, "Migration plan step count should be \(expectedMigrationPlanStepCount), but is \(migrationPlan.numberOfSteps).")
         do {
             try migrationPlan.executeForStore(at: storeURL, type: storeType, destinationURL: storeURL, storeType: storeType)
@@ -177,13 +167,13 @@ class PersistentStoreMigrationKitTests: XCTestCase {
     func testMigrationOperation() {
         let storeURL = workingDirectoryURL.appendingPathComponent("Automatically Migrated Store", isDirectory: false)
         do {
-            try initializeStoreAtURL(storeURL)
+            try testDataSet.copyStore(for: .v1, ofType: storeType, to: storeURL)
         } catch {
             XCTFail("Could not initialize persistent store: \(error)")
             return
         }
 
-        let latestModel = models.last!
+        let latestModel = TestDataSet.ModelVersion.latest.model
 
         let operationExpectation = expectation(description: "Migration operation succeeded")
         let operationQueue = OperationQueue()
@@ -194,7 +184,7 @@ class PersistentStoreMigrationKitTests: XCTestCase {
         migrationOperation.destinationURL = storeURL
         migrationOperation.destinationStoreType = storeType
         migrationOperation.destinationModel = latestModel
-        migrationOperation.bundles = [testBundle]
+        migrationOperation.bundles = [Bundle.test]
         migrationOperation.completionBlock = {
             XCTAssertNil(migrationOperation.error, "Migration operation failed: \(migrationOperation.error!)")
             operationExpectation.fulfill()
@@ -216,7 +206,7 @@ class PersistentStoreMigrationKitTests: XCTestCase {
     
     func testMigrationFailure() {
         let storeURL = workingDirectoryURL.appendingPathComponent("Store That Does Not Exist", isDirectory: false)
-        let latestModel = models.last!
+        let latestModel = TestDataSet.ModelVersion.latest.model
         let existingStoreMetadata: [String: AnyObject]
         do {
             existingStoreMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: storeType, at: storeURL) as [String : AnyObject]
@@ -225,7 +215,7 @@ class PersistentStoreMigrationKitTests: XCTestCase {
             existingStoreMetadata = [:]
         }
         do {
-            let migrationPlan = try MigrationPlan(storeMetadata: existingStoreMetadata, destinationModel: latestModel, bundles: [testBundle])
+            let migrationPlan = try MigrationPlan(storeMetadata: existingStoreMetadata, destinationModel: latestModel, bundles: [Bundle.test])
             XCTFail("Devising migration plan for nonexistant store succeeded: \(migrationPlan)")
         } catch {}
     }

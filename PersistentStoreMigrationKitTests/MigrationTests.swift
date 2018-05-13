@@ -130,7 +130,7 @@ final class MigrationTests: XCTestCase {
         let migratedStoreURL = workingDirectoryURL.appendingPathComponent(ProcessInfo.processInfo.globallyUniqueString)
         let latestModel = TestDataSet.ModelVersion.latestWithMigrationPath.model
 
-        let operationExpectation = expectation(description: "Migration operation executes successfully")
+        let operationExpectation = expectation(description: "Migration operation finishes")
         let operationQueue = OperationQueue()
         operationQueue.name = "Core Data Migration Test"
         let migrationOperation = MigrationOperation()
@@ -141,14 +141,38 @@ final class MigrationTests: XCTestCase {
         migrationOperation.destinationModel = latestModel
         migrationOperation.bundles = [.test]
         migrationOperation.completionBlock = {
+            defer { operationExpectation.fulfill() }
             XCTAssertNil(migrationOperation.error, "Migration operation failed: \(migrationOperation.error!)")
-            operationExpectation.fulfill()
         }
         operationQueue.addOperation(migrationOperation)
-        waitForExpectations(timeout: 10) { error in
-            XCTAssertNil(error)
+        waitForExpectations(timeout: 10) { _ in
             XCTAssertValidStore(at: migratedStoreURL, ofType: self.storeType, for: latestModel)
         }
+    }
+
+    /// Verifies that migration operations fail when the source store does not exist
+    func testMigrationOperationFailsWhenSourceStoreDoesNotExist() {
+        let pristineStoreInfo = testDataSet.infoForPristineStore(for: .v1, ofType: storeType)
+        let storeURL = pristineStoreInfo.url.deletingLastPathComponent().appendingPathComponent("Store That Does Not Exist", isDirectory: false)
+        let migratedStoreURL = workingDirectoryURL.appendingPathComponent(ProcessInfo.processInfo.globallyUniqueString)
+        let latestModel = TestDataSet.ModelVersion.latestWithMigrationPath.model
+
+        let operationExpectation = expectation(description: "Migration operation finishes")
+        let operationQueue = OperationQueue()
+        operationQueue.name = "Core Data Migration Test"
+        let migrationOperation = MigrationOperation()
+        migrationOperation.sourceURL = storeURL
+        migrationOperation.sourceStoreType = storeType
+        migrationOperation.destinationURL = migratedStoreURL
+        migrationOperation.destinationStoreType = storeType
+        migrationOperation.destinationModel = latestModel
+        migrationOperation.bundles = [.test]
+        migrationOperation.completionBlock = {
+            defer { operationExpectation.fulfill() }
+            XCTAssertNotNil(migrationOperation.error, "Migration operation did not yield an error.")
+        }
+        operationQueue.addOperation(migrationOperation)
+        waitForExpectations(timeout: 10)
     }
 }
 

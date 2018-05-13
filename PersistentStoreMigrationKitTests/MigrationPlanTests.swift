@@ -49,6 +49,14 @@ final class MigrationPlanTests: XCTestCase {
         super.tearDown()
     }
 
+    /// Verifies that a migration plan for A → A migrations does not required execution for store compatibility.
+    func testExecutingMigrationFromAToAIsNotRequiredForCompatibility() throws {
+        let pristineStoreInfo = testDataSet.infoForPristineStore(for: .v1, ofType: storeType)
+        let migrationPlan = try MigrationPlan(storeMetadata: pristineStoreInfo.metadata, destinationModel: TestDataSet.ModelVersion.v1.model, bundles: [.test])
+
+        XCTAssertFalse(migrationPlan.isExecutionRequiredForStoreCompatibility)
+    }
+
     /// Verifies migration plan execution for A → A migrations.
     func testMigrationFromAToAExecutesSuccessfully() throws {
         let pristineStoreInfo = testDataSet.infoForPristineStore(for: .v1, ofType: storeType)
@@ -56,7 +64,7 @@ final class MigrationPlanTests: XCTestCase {
         let migrationPlan = try MigrationPlan(storeMetadata: pristineStoreInfo.metadata, destinationModel: TestDataSet.ModelVersion.v1.model, bundles: [.test])
 
         XCTAssertNoThrow(try migrationPlan.executeForStore(at: pristineStoreInfo.url, type: storeType, destinationURL: migratedStoreURL, storeType: storeType))
-        XCTAssertFalse(FileManager.default.fileExists(atPath: migratedStoreURL.path))
+        XCTAssertValidStore(at: migratedStoreURL, ofType: storeType, for: TestDataSet.ModelVersion.v1.model)
     }
 
     /// Verifies migration plan execution for A → B migrations.

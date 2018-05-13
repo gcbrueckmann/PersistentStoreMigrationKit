@@ -116,6 +116,10 @@ extension TestDataSet {
 
             return Array(allVersions.suffix(from: earlierIndex + 1))
         }
+
+        static func mappingModel(from earlierVersion: ModelVersion, to laterVersion: ModelVersion) -> NSMappingModel? {
+            return NSMappingModel(from: [.test], forSourceModel: earlierVersion.model, destinationModel: laterVersion.model)
+        }
     }
 }
 

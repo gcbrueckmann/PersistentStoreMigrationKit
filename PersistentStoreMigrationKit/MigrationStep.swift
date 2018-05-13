@@ -9,15 +9,23 @@
 import Foundation
 import CoreData
 
-/// A `MigrationStep` instance encapsulates the migration from one `NSManagedObjectModel` to another without any intermediate models.
-/// Migration is performed via an `NSMigrationManager` using an `NSMappingModel`.
-final class MigrationStep: NSObject {
+/// A migration step encapsulates the migration from one `NSManagedObjectModel` to another without any intermediate models.
+///
+/// Source and destination models can be the same (if you want to copy stores without changing the model).
+struct MigrationStep {
+    
     /// Specifies how to from `sourceModel` to `destinationModel`.
-    let mappingModel: NSMappingModel
+    let mappingModel: NSMappingModel?
+
     /// The model to migrate from.
     let sourceModel: NSManagedObjectModel
+
     /// The model to migrate to.
     let destinationModel: NSManagedObjectModel
+
+    var isSameSourceAndDestinationModel: Bool {
+        return ((sourceModel.entityVersionHashesByName as NSDictionary) == (destinationModel.entityVersionHashesByName as NSDictionary))
+    }
     
     /// Initializes a migration step for a source model, destination model, and a mapping model.
     /// 
@@ -30,8 +38,15 @@ final class MigrationStep: NSObject {
         self.destinationModel = destinationModel
         self.mappingModel = mappingModel
     }
-    
-    private var progress: Progress?
+
+    /// Initializes a migration step for single source and destination model.
+    ///
+    /// - parameters model: The model to migrate from and to.
+    init(model: NSManagedObjectModel) {
+        self.sourceModel = model
+        self.destinationModel = model
+        self.mappingModel = nil
+    }
     
     /// Performs the migration from the persistent store identified by `sourceURL` and using `sourceModel` to `destinationModel`, saving the result in the persistent store identified by `destinationURL`.
     /// 
@@ -44,8 +59,6 @@ final class MigrationStep: NSObject {
     ///   - destinationStoreType: A string constant (such as `NSSQLiteStoreType`) that specifies the destination store type.
     func executeForStore(at sourceURL: URL, type sourceStoreType: String, destinationURL: URL, storeType destinationStoreType: String) throws {
         let progress = Progress(totalUnitCount: 100)
-        self.progress = progress
-        defer { self.progress = nil }
 
         let migrationManager = NSMigrationManager(sourceModel: sourceModel, destinationModel: destinationModel)
         let migrationProgressObserver = migrationManager.observe(\.migrationProgress, options: .new) { (_, change) in
@@ -68,10 +81,17 @@ extension MigrationStep {
     ///
     /// - Throws: Throws an error, if the necessary steps cannot be determined.
     static func stepsForMigratingExistingStore(withMetadata storeMetadata: [String: Any], to destinationModel: NSManagedObjectModel, searchBundles bundles: [Bundle]) throws -> [MigrationStep] {
-        var steps: [MigrationStep] = []
+        if destinationModel.isConfiguration(withName: nil, compatibleWithStoreMetadata: storeMetadata) {
+            // No migration strictly necessary, but we still need to return one step,
+            // because the migration might be executed with a different source and destination.
+            return [MigrationStep(model: destinationModel)]
+        }
+
         guard let storeModelVersionHashes = storeMetadata[NSStoreModelVersionHashesKey] as? [String: Any] else {
             throw Error.missingStoreModelVersionHashes
         }
+
+        var steps: [MigrationStep] = []
         var latestModelVersionHashes = storeModelVersionHashes
         let models = NSManagedObjectModel.models(in: bundles)
         while !(latestModelVersionHashes as NSDictionary).isEqual(to: destinationModel.entityVersionHashesByName) {

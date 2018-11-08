@@ -1,6 +1,6 @@
 # PersistentStoreMigrationKit
 
-PersistentStoreMigrationKit lets perform progressive migrations of Core
+PersistentStoreMigrationKit lets you perform progressive migrations of Core
 Data persistent stores easily. It is written in Swift 2.
 
 ## How It Works
@@ -18,11 +18,11 @@ latest model you specified.
 
 ```swift
 func configureManagedObjectContextForURL(persistentStoreURL: NSURL) throws -> NSManagedObjectContext {
-    // These are the required prequisites.
+    // These are the required prerequisites.
     let latestModel: NSManagedObjectModel
     let modelBundles: [NSBundle.mainBundle()]
     let persistentStoreType = NSSQLiteStoreType
-    
+
     // Load metadata from persistent store.
     let persistentStoreMetadata: [String: AnyObject]?
     do {
@@ -35,7 +35,7 @@ func configureManagedObjectContextForURL(persistentStoreURL: NSURL) throws -> NS
     	print("Could not retrieve metadata for persistent store at \(persistentStoreURL): \(error)")
     	throw error
     }
-    
+
     // Devise and execute migration plan, if metadata is available,
     // i.e. the persistent store already exists.
 	if let persistentStoreMetadata = persistentStoreMetadata {
@@ -53,7 +53,7 @@ func configureManagedObjectContextForURL(persistentStoreURL: NSURL) throws -> NS
 			throw error
 		}
 	}
-    
+
     // Configure persistent store coordinator and managed object context.
 	let persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: latestModel)
 	do {
@@ -74,11 +74,11 @@ class that conveniently wraps the migration plan workflow into an
 
 ```swift
 func configureManagedObjectContextForURL(persistentStoreURL: NSURL, completionHandler: (NSManagedObjectContext?, error: ErrorType?) -> Void) {
-    // These are the required prequisites.
+    // These are the required prerequisites.
     let latestModel: NSManagedObjectModel
     let modelBundles: [NSBundle.mainBundle()]
     let persistentStoreType = NSSQLiteStoreType
-    
+
 	let migrationOperation = MigrationOperation()
 	migrationOperation.sourceURL = persistentStoreURL
 	migrationOperation.sourceStoreType = persistentStoreType
@@ -128,7 +128,7 @@ do {
 
 [Georg C. Brückmann](http://gcbrueckmann.de)
 
-This project was inspired by and profitted heavily from the article
+This project was inspired by and profited heavily from the article
 [Custom Core Data
 Migrations](https://www.objc.io/issues/4-core-data/core-data-migration/)
  by [Martin Hwasser](https://github.com/hwaxxer) and, of course, pretty
